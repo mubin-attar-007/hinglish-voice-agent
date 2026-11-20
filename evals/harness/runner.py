@@ -35,12 +35,14 @@ def mock_factory(profile: str) -> LLMFactory:
     return make
 
 
-def gemini_factory(model: str, meter: CostMeter | None = None) -> LLMFactory:
+def gemini_factory(
+    model: str, meter: CostMeter | None = None, thinking: str | None = "low"
+) -> LLMFactory:
     """Real Gemini calls. One shared meter counts every request and enforces the cost cap."""
     from voice_agent.llm.gemini import GeminiLLM
 
     def make(scenario: Scenario, seed_: int) -> LLMProvider:
-        return GeminiLLM(model=model, seed=seed_, meter=meter)
+        return GeminiLLM(model=model, seed=seed_, meter=meter, thinking=thinking)
 
     return make
 

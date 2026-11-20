@@ -24,7 +24,8 @@ from voice_agent.llm.pricing import CostMeter
 from voice_agent.tools import ToolCall, ToolSpec
 
 DEFAULT_MODEL = "gemini-3.8-flash"
-REQUEST_TIMEOUT_MS = 30_000
+REQUEST_TIMEOUT_MS = 60_000  # sent to the server as its deadline (X-Server-Timeout)
+DEFAULT_THINKING = "low"  # a phone call cannot wait for long thinking
 RETRY_ATTEMPTS = 3  # the SDK retries rate limits and server errors
 
 
@@ -36,8 +37,10 @@ class GeminiLLM:
         client: Any | None = None,
         seed: int | None = None,
         meter: CostMeter | None = None,
+        thinking: str | None = DEFAULT_THINKING,
     ) -> None:
         self.name = model
+        self.thinking = thinking  # minimal | low | medium | high | None (the model's default)
         self._seed = seed
         self._meter = meter
         if client is None:
@@ -80,6 +83,11 @@ class GeminiLLM:
             ],
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
             seed=self._seed,
+            thinking_config=types.ThinkingConfig(
+                thinking_level=types.ThinkingLevel(self.thinking.upper())
+            )
+            if self.thinking
+            else None,
         )
         if self._meter is not None:
             self._meter.check()

@@ -29,7 +29,7 @@ from evals.graders.deterministic import grade
 from evals.harness.report import summarise, transcript
 from evals.harness.runner import LLMFactory, TrialRecord, gemini_factory, mock_factory, run_trial
 from evals.schema import load_corpus
-from voice_agent.llm.gemini import DEFAULT_MODEL
+from voice_agent.llm.gemini import DEFAULT_MODEL, DEFAULT_THINKING
 from voice_agent.llm.mock import PROFILES
 from voice_agent.llm.pricing import PRICES, BudgetExceeded, CostMeter
 from voice_agent.tools import SafetyConfig
@@ -56,6 +56,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--llm", default="mock-reckless", choices=[*sorted(PROFILES), "gemini"])
     parser.add_argument("--model", help=f"the Gemini model id (default {DEFAULT_MODEL})")
     parser.add_argument(
+        "--thinking",
+        choices=["minimal", "low", "medium", "high"],
+        help="Gemini thinking level (default low: a phone call can't wait for long thinking)",
+    )
+    parser.add_argument(
         "--max-usd",
         type=_positive,
         default=1.0,
@@ -80,8 +85,8 @@ def main(argv: list[str] | None = None) -> int:
         "(shows a baseline run is not vacuous)",
     )
     args = parser.parse_args(argv)
-    if args.model and args.llm != "gemini":
-        parser.error("--model applies to --llm gemini only")
+    if (args.model or args.thinking) and args.llm != "gemini":
+        parser.error("--model and --thinking apply to --llm gemini only")
 
     corpus = load_corpus(args.corpus)
     safety = SafetyConfig() if args.safety == "full" else SafetyConfig.baseline()
@@ -97,7 +102,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"No dated price for {model} in voice_agent/llm/pricing.py.", file=sys.stderr)
             return 2
         meter = CostMeter(price, cap_usd=args.max_usd)
-        factory = gemini_factory(model, meter)
+        factory = gemini_factory(model, meter, args.thinking or DEFAULT_THINKING)
     else:
         factory = mock_factory(args.llm)
 
@@ -151,6 +156,8 @@ def main(argv: list[str] | None = None) -> int:
         errors=errors,
         stopped=stopped,
     )
+    if args.llm == "gemini":
+        report["model"]["thinking"] = args.thinking or DEFAULT_THINKING
     metrics = report["metrics"]
     if not report["complete"]:
         print(f"  INCOMPLETE: {stopped or ''} {len(errors)} errored trial(s)")
