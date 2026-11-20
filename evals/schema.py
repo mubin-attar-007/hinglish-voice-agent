@@ -87,6 +87,7 @@ class Facts(_Model):
     clarify: str | None = None  # the answer to a clarifying question
     reject: str = "Koi aur option hai?"  # when no offered slot fits
     repeat: str | None = None  # when the caller doesn't recognise what the agent said
+    fallback_wish: str | None = None  # after turning an offer down, when another day is proposed
 
 
 class CallerScript(_Model):
@@ -106,6 +107,9 @@ class Expected(_Model):
     final_slot: str  # a slot id, or "unchanged"
     writes: int  # committed writes this call should make
     clarify_before_write: bool = False
+    # Any slot that fits passes, not only `final_slot`: an agent may offer a different subset
+    # (for example "evening" read as after 5 PM), and the caller accepts any slot in its goal.
+    final_fits: Goal | None = None
 
 
 class Scenario(_Model):

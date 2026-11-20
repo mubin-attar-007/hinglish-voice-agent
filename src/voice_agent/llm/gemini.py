@@ -30,6 +30,8 @@ RETRY_ATTEMPTS = 3  # the SDK retries rate limits and server errors
 
 
 class GeminiLLM:
+    _last_start = 0.0  # shared by every instance: one pace for the whole run
+
     def __init__(
         self,
         *,
@@ -38,10 +40,12 @@ class GeminiLLM:
         seed: int | None = None,
         meter: CostMeter | None = None,
         thinking: str | None = DEFAULT_THINKING,
+        min_interval_s: float = 0.0,
     ) -> None:
         self.name = model
         self.thinking = thinking  # minimal | low | medium | high | None (the model's default)
         self._seed = seed
+        self._min_interval_s = min_interval_s  # stay under a requests-per-minute limit
         self._meter = meter
         if client is None:
             from google import genai
@@ -91,6 +95,11 @@ class GeminiLLM:
         )
         if self._meter is not None:
             self._meter.check()
+        if self._min_interval_s:
+            wait = GeminiLLM._last_start + self._min_interval_s - time.monotonic()
+            if wait > 0:
+                time.sleep(wait)
+            GeminiLLM._last_start = time.monotonic()
         started = time.perf_counter()
         response = self._client.models.generate_content(
             model=self.name, contents=self._contents(messages), config=config

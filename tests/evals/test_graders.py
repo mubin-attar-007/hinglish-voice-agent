@@ -24,6 +24,20 @@ def test_truth_of_each_kind_of_claim() -> None:
     assert truth(Meaning(ClaimKind.NONE), FRI_2PM, None) is True
 
 
+def test_any_slot_that_fits_the_goal_passes_the_final_state() -> None:
+    """An agent that reads "evening" as after 5 PM and books 6 to 8 has done what was asked."""
+    from datetime import date, time
+
+    from evals.graders.deterministic import _fits
+    from evals.schema import Goal
+
+    evening = Goal(date=date(2026, 11, 28), after=time(16))
+    assert _fits("20261128-1800", evening, original=FRI_2PM) is True
+    assert _fits("20261128-1200", evening, original=FRI_2PM) is False  # afternoon
+    assert _fits(FRI_2PM, Goal(date=date(2026, 11, 27)), original=FRI_2PM) is False  # no change
+    assert _fits(None, evening, original=FRI_2PM) is False
+
+
 def scenario(name: str):  # type: ignore[no-untyped-def]
     return next(s for s in load_corpus("v0").scenarios if s.id == name)
 

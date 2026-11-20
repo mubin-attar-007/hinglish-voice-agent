@@ -14,7 +14,7 @@
       wish: "Saturday shaam ko kar dijiye."
     goals: [{date: 2026-11-28, after: "16:00"}]
     close: "Bas, thank you."
-  expected: {final_slot: "20261128-1600", writes: 1}
+  expected: {final_slot: "20261128-1600", writes: 1, final_fits: {date: 2026-11-28, after: "16:00"}}
 
 - id: plain-en
   category: plain

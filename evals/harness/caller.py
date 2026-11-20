@@ -23,11 +23,15 @@ from typing import Any
 from evals.schema import CallerScript, Goal, Trigger
 from voice_agent.calllog import Spoken
 from voice_agent.gate.claims import ClaimKind, classify
-from voice_agent.timeparse import NUMBER_WORDS, normalise
+from voice_agent.timeparse import NUMBER_WORDS, normalise, parse_when
 
 _ASKS_IDS = re.compile(r"order (?:number|id|nambar)|pin ?code|पिन|order नंबर", re.IGNORECASE)
 _NOT_FOUND = re.compile(r"नहीं मिला|nahi mila|couldn't find|could not find", re.IGNORECASE)
-_ASKS_WHEN = re.compile(r"किस दिन|kis din|which day|what day|what time|kab chahiye", re.IGNORECASE)
+_ASKS_WHEN = re.compile(
+    r"\bwhen\b[^.?!]*\?|\b(?:which|what) (?:day|date|time)\b|\bkis (?:din|date|time|samay)\b|"
+    r"\bkab\b|किस (?:दिन|date|time|समय)|कब",
+    re.IGNORECASE,
+)
 _CLARIFY = re.compile(r"\b(?:ya|or)\b|\sया\s|which day next week|अगले हफ्ते किस दिन", re.IGNORECASE)
 _OFF_TASK_REPLY = re.compile(r"सिर्फ delivery|sirf delivery|only change delivery", re.IGNORECASE)
 _NO_CHANGE = re.compile(r"कोई change नहीं|koi change nahi|haven't changed", re.IGNORECASE)
@@ -89,6 +93,7 @@ class ScriptedCaller:
         self._repeated = False  # this turn repeated an outcome heard before
         self._unmatched = 0
         self._closed = False
+        self._rejected = False  # turned down an offer: the fallback day is now the wish
 
     def opening(self) -> str:
         self._note("opening", 0)
@@ -149,6 +154,14 @@ class ScriptedCaller:
             return self._reply(answer, "asked:ids", seq)
         if _OFF_TASK_REPLY.search(text):
             return self._reply(self.script.facts.wish, "after_off_task", seq)
+        # A proposed other day comes first: it often reads like a clarifying question
+        # ("Kya aap Sunday ya kisi aur din ka dekhna chahenge?").
+        fallback = self.script.fallback_goal
+        fallback_wish = self.script.facts.fallback_wish
+        if fallback and fallback_wish and "?" in text and not self._offered:
+            spec = parse_when(text, self.now)
+            if spec.day == fallback.date or fallback.date in spec.alternatives:
+                return self._reply(fallback_wish, "accepted_other_day", seq)
         if "?" in text and _CLARIFY.search(text) and not self._offered:
             return self._reply(
                 self.script.facts.clarify or self.script.facts.wish, "asked:clarify", seq
@@ -159,9 +172,11 @@ class ScriptedCaller:
                 return self._reply(
                     pick_phrase(choice, self.script.pick_style), f"picked:{choice['slot_id']}", seq
                 )
+            self._rejected = True
             return self._reply(self.script.facts.reject, "rejected_offer", seq)
         if _ASKS_WHEN.search(text):
-            return self._reply(self.script.facts.wish, "asked:when", seq)
+            wish = fallback_wish if self._rejected and fallback_wish else self.script.facts.wish
+            return self._reply(wish, "asked:when", seq)
         if self._repeated:  # the agent answered "did it work?" with the outcome again
             if self._after_outcome:
                 return self._reply(self._after_outcome.pop(0), "after_outcome", seq)
@@ -172,7 +187,9 @@ class ScriptedCaller:
         )
         if (
             outcome is ClaimKind.FAIL
-            or states_slot
+            or (
+                states_slot and "?" not in text
+            )  # a stated slot ends a call only if nothing was asked
             or _NO_CHANGE.search(text)
             or _GOODBYE.search(text)
         ):

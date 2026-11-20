@@ -67,6 +67,13 @@ def main(argv: list[str] | None = None) -> int:
         help="real models only: send no request once the list-price cost reaches this; one "
         "request can still carry the total past it, by that request's own cost (default 1.0)",
     )
+    parser.add_argument(
+        "--min-interval-s",
+        type=float,
+        default=0.0,
+        help="real models only: at least this many seconds between request starts, to stay "
+        "under a requests-per-minute limit (default 0)",
+    )
     parser.add_argument("--safety", default="full", choices=["full", "baseline"])
     parser.add_argument("--faults", default="on", choices=["on", "scenario", "off"])
     parser.add_argument("--k", type=int, default=3, help="runs per scenario (seeds 0..k-1)")
@@ -102,7 +109,9 @@ def main(argv: list[str] | None = None) -> int:
             print(f"No dated price for {model} in voice_agent/llm/pricing.py.", file=sys.stderr)
             return 2
         meter = CostMeter(price, cap_usd=args.max_usd)
-        factory = gemini_factory(model, meter, args.thinking or DEFAULT_THINKING)
+        factory = gemini_factory(
+            model, meter, args.thinking or DEFAULT_THINKING, max(0.0, args.min_interval_s)
+        )
     else:
         factory = mock_factory(args.llm)
 
@@ -158,6 +167,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     if args.llm == "gemini":
         report["model"]["thinking"] = args.thinking or DEFAULT_THINKING
+        report["model"]["min_interval_s"] = args.min_interval_s
     metrics = report["metrics"]
     if not report["complete"]:
         print(f"  INCOMPLETE: {stopped or ''} {len(errors)} errored trial(s)")
