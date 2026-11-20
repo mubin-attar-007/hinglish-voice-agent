@@ -1,11 +1,11 @@
 {
   "schema": "hinglish-voice-agent/results/v1",
   "date": "2026-11-20",
-  "git_commit": "21015db",
+  "git_commit": "0fa5b8e-dirty",
   "mode": "text",
   "corpus": {
     "version": "v0",
-    "sha256": "28cff54cf24be02e87ced594e2b8b2a7ba2e35309400659a3e0d63c674d1bf9d",
+    "sha256": "8a7d2170528951436f9a9f17af715a485cf58ec4b750a4a87937ac00d0fa5795",
     "scenarios": 20
   },
   "model": {
@@ -115,8 +115,9 @@
     },
     "gate": {
       "allow": 315,
-      "would_rewrite": 117,
+      "would_rewrite": 114,
       "outcome_by_code": 0,
+      "silenced_claims": 0,
       "would_block": 24
     },
     "by_category": {
