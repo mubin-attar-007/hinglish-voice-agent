@@ -1,11 +1,11 @@
 {
   "schema": "hinglish-voice-agent/results/v1",
   "date": "2026-11-20",
-  "git_commit": "98842fe",
+  "git_commit": "8bdd16f",
   "mode": "text",
   "corpus": {
     "version": "v0",
-    "sha256": "8a7d2170528951436f9a9f17af715a485cf58ec4b750a4a87937ac00d0fa5795",
+    "sha256": "0ff676161a9221e2820112f5272a53caba9ead608b63d5cf7bfafa104cbce5c4",
     "scenarios": 20
   },
   "model": {
@@ -30,6 +30,10 @@
     2
   ],
   "trials": 60,
+  "planned_trials": 60,
+  "complete": true,
+  "stopped": null,
+  "errored_trials": [],
   "metrics": {
     "pass_at_1": {
       "value": 1.0,
@@ -42,7 +46,8 @@
     "pass_hat_k": {
       "k": 3,
       "value": 1.0,
-      "method": "mean over scenarios of C(passes, k) / C(runs, k)"
+      "scenarios": 20,
+      "method": "mean over scenarios with all k runs of C(passes, k) / C(runs, k)"
     },
     "duplicate_writes": {
       "count": 0,
@@ -142,8 +147,10 @@
   "cost": {
     "input_tokens": 0,
     "output_tokens": 0,
+    "thinking_tokens": 0,
     "usd": 0.0,
-    "prices": {}
+    "price": null,
+    "method": "tokens at the dated list price (paid tier); a free-tier key is not charged"
   },
   "failures": []
 }

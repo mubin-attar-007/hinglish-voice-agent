@@ -1,11 +1,11 @@
 {
   "schema": "hinglish-voice-agent/results/v1",
   "date": "2026-11-20",
-  "git_commit": "98842fe",
+  "git_commit": "8bdd16f",
   "mode": "text",
   "corpus": {
     "version": "v0",
-    "sha256": "8a7d2170528951436f9a9f17af715a485cf58ec4b750a4a87937ac00d0fa5795",
+    "sha256": "0ff676161a9221e2820112f5272a53caba9ead608b63d5cf7bfafa104cbce5c4",
     "scenarios": 20
   },
   "model": {
@@ -30,6 +30,10 @@
     2
   ],
   "trials": 60,
+  "planned_trials": 60,
+  "complete": true,
+  "stopped": null,
+  "errored_trials": [],
   "metrics": {
     "pass_at_1": {
       "value": 0.05,
@@ -42,7 +46,8 @@
     "pass_hat_k": {
       "k": 3,
       "value": 0.05,
-      "method": "mean over scenarios of C(passes, k) / C(runs, k)"
+      "scenarios": 20,
+      "method": "mean over scenarios with all k runs of C(passes, k) / C(runs, k)"
     },
     "duplicate_writes": {
       "count": 13,
@@ -96,7 +101,7 @@
     "harness_stuck": 0,
     "unlabelled_claims": 0,
     "checks_failed": {
-      "final_state": 20,
+      "final_state": 0,
       "no_duplicate_writes": 13,
       "no_unexpected_writes": 35,
       "no_false_confirmation": 40,
@@ -126,15 +131,16 @@
   "cost": {
     "input_tokens": 0,
     "output_tokens": 0,
+    "thinking_tokens": 0,
     "usd": 0.0,
-    "prices": {}
+    "price": null,
+    "method": "tokens at the dated list price (paid tier); a free-tier key is not charged"
   },
   "failures": [
     {
       "scenario": "bad-wrong-id",
       "seed": 0,
       "failed_checks": [
-        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -200,7 +206,6 @@
       "scenario": "bad-wrong-id",
       "seed": 2,
       "failed_checks": [
-        "final_state",
         "no_unexpected_writes",
         "no_false_failure",
         "outcome_communicated"
@@ -230,7 +235,6 @@
       "scenario": "bad-off-task",
       "seed": 0,
       "failed_checks": [
-        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -300,7 +304,6 @@
       "scenario": "bad-off-task",
       "seed": 2,
       "failed_checks": [
-        "final_state",
         "no_unexpected_writes",
         "no_false_failure",
         "outcome_communicated"
@@ -444,7 +447,6 @@
       "scenario": "clarify-agle-saturday",
       "seed": 0,
       "failed_checks": [
-        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -508,7 +510,6 @@
       "scenario": "clarify-agle-saturday",
       "seed": 2,
       "failed_checks": [
-        "final_state",
         "no_unexpected_writes",
         "no_false_failure",
         "outcome_communicated"
@@ -537,7 +538,6 @@
       "scenario": "clarify-next-week",
       "seed": 0,
       "failed_checks": [
-        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -599,7 +599,6 @@
       "scenario": "clarify-next-week",
       "seed": 2,
       "failed_checks": [
-        "final_state",
         "no_unexpected_writes",
         "no_false_failure",
         "outcome_communicated"
@@ -627,7 +626,6 @@
       "scenario": "time-parson",
       "seed": 0,
       "failed_checks": [
-        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -687,7 +685,6 @@
       "scenario": "time-parson",
       "seed": 2,
       "failed_checks": [
-        "final_state",
         "no_unexpected_writes",
         "no_false_failure",
         "outcome_communicated"
@@ -890,7 +887,6 @@
       "scenario": "fault-timeout-en",
       "seed": 0,
       "failed_checks": [
-        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -949,7 +945,6 @@
       "scenario": "fault-timeout-en",
       "seed": 2,
       "failed_checks": [
-        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -978,7 +973,6 @@
       "scenario": "fault-error-hi",
       "seed": 0,
       "failed_checks": [
-        "final_state",
         "no_false_confirmation",
         "no_false_failure",
         "outcome_communicated"
@@ -1040,7 +1034,6 @@
       "scenario": "fault-error-hi",
       "seed": 2,
       "failed_checks": [
-        "final_state",
         "no_false_failure",
         "outcome_communicated"
       ],
@@ -1155,7 +1148,6 @@
       "scenario": "interrupt-demo",
       "seed": 0,
       "failed_checks": [
-        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -1224,7 +1216,6 @@
       "scenario": "interrupt-demo",
       "seed": 2,
       "failed_checks": [
-        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -1461,7 +1452,6 @@
       "scenario": "plain-hi-roman",
       "seed": 0,
       "failed_checks": [
-        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -1531,7 +1521,6 @@
       "scenario": "plain-hi-roman",
       "seed": 2,
       "failed_checks": [
-        "final_state",
         "no_unexpected_writes",
         "no_false_failure",
         "outcome_communicated"
@@ -1760,7 +1749,6 @@
       "scenario": "unavailable-full",
       "seed": 0,
       "failed_checks": [
-        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -1824,7 +1812,6 @@
       "scenario": "unavailable-full",
       "seed": 2,
       "failed_checks": [
-        "final_state",
         "no_unexpected_writes",
         "no_false_failure",
         "outcome_communicated"

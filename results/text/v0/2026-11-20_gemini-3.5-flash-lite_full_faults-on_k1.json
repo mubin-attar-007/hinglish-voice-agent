@@ -1,0 +1,284 @@
+{
+  "schema": "hinglish-voice-agent/results/v1",
+  "date": "2026-11-20",
+  "git_commit": "70c2ec5-dirty",
+  "mode": "text",
+  "corpus": {
+    "version": "v0",
+    "sha256": "8a7d2170528951436f9a9f17af715a485cf58ec4b750a4a87937ac00d0fa5795",
+    "scenarios": 19
+  },
+  "model": {
+    "name": "gemini-3.5-flash-lite",
+    "note": "",
+    "thinking": "low"
+  },
+  "safety": {
+    "label": "full",
+    "idempotency": true,
+    "cas": true,
+    "deadline": true,
+    "reread": true,
+    "preconditions": true,
+    "gate": true,
+    "outcome_by_code": true
+  },
+  "faults": "on",
+  "k": 1,
+  "seeds": [
+    0
+  ],
+  "trials": 19,
+  "planned_trials": 20,
+  "complete": false,
+  "stopped": "stopped after a provider error: ClientError(\"429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check y",
+  "errored_trials": [
+    {
+      "scenario": "unavailable-taken",
+      "seed": 0,
+      "error": "ClientError(\"429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate"
+    }
+  ],
+  "metrics": {
+    "pass_at_1": {
+      "value": 0.7894736842105263,
+      "ci95": [
+        0.5789473684210527,
+        0.9473684210526315
+      ],
+      "method": "share of trials that pass every check; 95% interval from a bootstrap over scenarios"
+    },
+    "pass_hat_k": {
+      "k": 1,
+      "value": 0.7894736842105263,
+      "scenarios": 19,
+      "method": "mean over scenarios with all k runs of C(passes, k) / C(runs, k)"
+    },
+    "duplicate_writes": {
+      "count": 0,
+      "trials_with_any": 0,
+      "trials": 19,
+      "rate_per_trial": 0.0,
+      "ci95": [
+        0.0,
+        0.16818436536845052
+      ],
+      "method": "commits that re-apply a change already committed",
+      "upper95_when_zero": {
+        "rule_of_three": 0.15789473684210525,
+        "exact": 0.14586850331224344
+      }
+    },
+    "unexpected_writes": {
+      "count": 0,
+      "trials_with_any": 0,
+      "trials": 19,
+      "rate_per_trial": 0.0,
+      "ci95": [
+        0.0,
+        0.16818436536845052
+      ],
+      "method": "commits beyond the scenario's expected number of writes",
+      "upper95_when_zero": {
+        "rule_of_three": 0.15789473684210525,
+        "exact": 0.14586850331224344
+      }
+    },
+    "false_confirmations": {
+      "count": 0,
+      "trials_with_any": 0,
+      "trials": 19,
+      "rate_per_trial": 0.0,
+      "ci95": [
+        0.0,
+        0.16818436536845052
+      ],
+      "method": "heard statements that a change is done, or of a slot, that the record did not show when they were heard (or by the end of the call)",
+      "upper95_when_zero": {
+        "rule_of_three": 0.15789473684210525,
+        "exact": 0.14586850331224344
+      }
+    },
+    "false_failures": {
+      "count": 0,
+      "trials_with_any": 0,
+      "trials": 19,
+      "rate_per_trial": 0.0,
+      "ci95": [
+        0.0,
+        0.16818436536845052
+      ],
+      "method": "heard statements that a change failed while the record showed it saved (or that a later write made false)",
+      "upper95_when_zero": {
+        "rule_of_three": 0.15789473684210525,
+        "exact": 0.14586850331224344
+      }
+    },
+    "clarification": {
+      "required": 2,
+      "correct": 2,
+      "method": "a clarifying question was answered before the first write"
+    },
+    "harness_stuck": 0,
+    "unlabelled_claims": 1,
+    "checks_failed": {
+      "final_state": 4,
+      "no_duplicate_writes": 0,
+      "no_unexpected_writes": 0,
+      "no_false_confirmation": 0,
+      "no_false_failure": 0,
+      "outcome_communicated": 3,
+      "clarified_before_acting": 0,
+      "harness_ok": 0
+    },
+    "gate": {
+      "allow": 126,
+      "outcome_by_code": 18,
+      "silenced_claims": 0,
+      "rewrite": 8,
+      "rewrite_disagreed": 1
+    },
+    "by_category": {
+      "bad_input": 1.0,
+      "change_of_mind": 1.0,
+      "clarification": 1.0,
+      "code_mixed_time": 1.0,
+      "fault": 0.6666666666666666,
+      "interruption": 1.0,
+      "plain": 0.3333333333333333,
+      "unavailable": 0.0
+    }
+  },
+  "cost": {
+    "input_tokens": 151594,
+    "output_tokens": 5583,
+    "thinking_tokens": 1075,
+    "usd": 0.0594,
+    "price": {
+      "input_per_mtok_usd": 0.3,
+      "output_per_mtok_usd": 2.5,
+      "checked": "2026-11-20",
+      "source": "https://aistudio.google.com/docs/pricing"
+    },
+    "method": "tokens at the dated list price (paid tier); a free-tier key is not charged"
+  },
+  "failures": [
+    {
+      "scenario": "fault-timeout-en",
+      "seed": 0,
+      "failed_checks": [
+        "final_state"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hi, order 48291, PIN 380015. Please move my delivery to Saturday evening.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'after_time': '17:00', 'date': '2026-11-28'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): This Saturday, we have a slot from 18:00 to 20:00 available.",
+        "agent (model/no_claim): Would that work for you?",
+        "caller: The 6 to 8 one, please.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'saved', 'verified_from_order_system': True, 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}, 'say_this': 'Done. Your delivery is now on Saturday, 28 November, between 6 and 8 PM.'}",
+        "agent (template/outcome_by_code): Done. Your delivery is now on Saturday, 28 November, between 6 and 8 PM.",
+        "caller: Did it work?",
+        "agent (template/render_from_record): Done. Your delivery is now on Saturday, 28 November, between 6 and 8 PM.",
+        "agent (model/no_claim): Is there anything else I can help you with?",
+        "caller: Thanks, bye.",
+        "agent (model/no_claim): You're welcome!",
+        "agent (model/no_claim): Goodbye."
+      ]
+    },
+    {
+      "scenario": "plain-en",
+      "seed": 0,
+      "failed_checks": [
+        "final_state",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hi, I'd like to change my delivery time.",
+        "agent (model/no_claim): Hello!",
+        "agent (model/no_claim): I can help you with that.",
+        "agent (model/no_claim): Could you please give me your order ID and the 6-digit delivery PIN code?",
+        "caller: My order number is 48291 and the PIN code is 380015.",
+        "  [tool] lookup_order({'pincode': '380015', 'order_id': '48291'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): Thanks!",
+        "agent (template/render_current): Your delivery is on Friday, 27 November, between 2 and 4 PM.",
+        "agent (model/no_claim): When would you like to reschedule it to?",
+        "caller: That's all, thank you.",
+        "agent (model/no_claim): You're welcome!",
+        "agent (model/no_claim): Just let me know if you decide to change the delivery time later."
+      ]
+    },
+    {
+      "scenario": "plain-devanagari",
+      "seed": 0,
+      "failed_checks": [
+        "final_state",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: नमस्ते, मुझे अपनी delivery का time बदलना है।",
+        "agent (model/no_claim): नमस्ते!",
+        "agent (model/no_claim): Aap apna order ID aur 6-digit delivery PIN code bataiye, taaki main order check kar saku.",
+        "caller: ऑर्डर 48291, पिनकोड 380015।",
+        "  [tool] lookup_order({'pincode': '380015', 'order_id': '48291'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (template/render_current): आपकी delivery अभी Friday, 27 November, दोपहर 2 से 4 बजे के बीच है।",
+        "agent (model/no_claim): Aap kis date aur time par delivery chahte hain?",
+        "caller: बस, धन्यवाद।",
+        "agent (model/no_claim): Aapko aur koi madad chahiye kya, ya aapko delivery ka time badalna hai?"
+      ]
+    },
+    {
+      "scenario": "unavailable-full",
+      "seed": 0,
+      "failed_checks": [
+        "final_state",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, order 48291, pincode 380015. Saturday shaam ka slot chahiye.",
+        "  [tool] lookup_order({'pincode': '380015', 'order_id': '48291'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': False}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': False}]}",
+        "  [tool] list_slots({'date': '2026-11-28'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1000', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '10:00-12:00', 'available': True}, {'slot_id': '20261128-1200', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '12:00-14:00', 'available': True}, {'slot_id': '20261128-1400', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '14:00-16:00', 'available': True}, {'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': False}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': False}]}",
+        "agent (model/no_claim): Saturday shaam ke slots available nahi hain.",
+        "agent (model/no_claim): Kya aap 12:00 se 14:00 ya 14:00 se 16:00 wala slot lena chahenge?",
+        "caller: Koi aur din ho sakta hai?",
+        "agent (model/no_claim): Aapko kis din ka slot chahiye?",
+        "caller: Saturday shaam ko.",
+        "agent (model/no_claim): Saturday shaam (16:00 ke baad) ke slots is hafte available nahi hain.",
+        "agent (model/no_claim): Kya aap Sunday ya kisi aur din ka dekhna chahenge?",
+        "caller: Saturday shaam ko.",
+        "agent (model/no_claim): Saturday shaam ke slots fully booked hain.",
+        "agent (model/no_claim): Kya aap Saturday ko 12:00 se 14:00 ya 14:00 se 16:00 wala slot book karna chahenge?",
+        "caller: Saturday shaam ko.",
+        "agent (model/no_claim): Main samajh sakta hoon ki aapko shaam ka hi slot chahiye, lekin Saturday shaam ko koi available slot nahi hai.",
+        "agent (model/no_claim): Agar aap chahein toh main Sunday ke slots check kar sakta hoon?",
+        "caller: Saturday shaam ko.",
+        "agent (model/no_claim): Saturday shaam ke liye hamare paas koi slot khali nahi hai.",
+        "agent (model/no_claim): Main sirf delivery slots change kar sakta hoon, isliye agar aap Saturday afternoon ya kisi aur din ka slot chahein toh batayein.",
+        "caller: Saturday shaam ko.",
+        "agent (model/no_claim): Saturday shaam ko slots available nahi hain.",
+        "agent (model/no_claim): Kya aap Saturday ko 14:00 se 16:00 wala slot book karna chahenge?",
+        "caller: Saturday shaam ko.",
+        "agent (model/no_claim): Saturday shaam ke slots available nahi hain.",
+        "agent (model/no_claim): Kya aap Sunday ka koi slot dekhna chahenge?",
+        "caller: Saturday shaam ko.",
+        "agent (model/no_claim): Saturday shaam ke slots available nahi hain.",
+        "agent (model/no_claim): Kya aap Saturday ko 12:00 se 14:00 wala slot book karna chahenge?",
+        "caller: Saturday shaam ko.",
+        "agent (model/no_claim): Saturday shaam ke slots available nahi hain.",
+        "agent (model/no_claim): Kya aap kisi aur din ka slot lena chahenge?",
+        "caller: Saturday shaam ko.",
+        "agent (template/render_current): आपकी delivery अभी Friday, 27 November, दोपहर 2 से 4 बजे के बीच है।",
+        "agent (model/no_claim): Kya aapko kisi aur din ki delivery ke liye help chahiye?",
+        "caller: Theek hai, thank you.",
+        "agent (model/no_claim): Namaste!",
+        "agent (model/no_claim): Agar aur koi madad chahiye ho toh zaroor bataiyega.",
+        "agent (model/no_claim): Good bye!"
+      ]
+    }
+  ]
+}

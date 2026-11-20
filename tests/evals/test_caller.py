@@ -82,6 +82,21 @@ def test_after_turning_an_offer_down_the_caller_accepts_another_proposed_day() -
     assert proposal.say == found.caller.facts.fallback_wish
 
 
+def test_anything_else_after_a_cancelled_change_is_the_end_of_the_call() -> None:
+    """From the second real-model run: the caller must not ask for the cancelled slot again."""
+    caller, found = caller_for("mind-cancel")
+    action = turn(
+        caller,
+        (
+            "आपकी delivery अभी Friday, 27 November, दोपहर 2 से 4 बजे के बीच है।",
+            "template",
+            Meaning(ClaimKind.STATE_SLOT, FRIDAY_2PM),
+        ),
+        ("Kya aapko kuch aur madad chahiye?", "model", None),
+    )
+    assert action.say == found.caller.close
+
+
 def test_a_stated_slot_with_no_question_still_ends_a_cancelled_change() -> None:
     caller, found = caller_for("mind-cancel")
     action = turn(

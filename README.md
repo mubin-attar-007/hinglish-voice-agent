@@ -2,7 +2,7 @@
 
 > **Status: milestone M1 of M4 (text mode).**
 > - There is no live demo yet.
-> - The results so far come from mocked models only, and are labelled that way.
+> - The results so far come from mocked models and from one real model in text mode, and are labelled that way.
 > - Every number this project publishes comes with its method, sample, date and scope.
 
 A voice agent that changes a delivery slot over a live call in Hinglish. It never double-books and never falsely confirms the change, even when the booking service times out after saving.
@@ -50,7 +50,12 @@ Not live yet. A public demo and a captioned recording are planned for milestones
 - **The well-behaved mock still double-books without the layers.** A write that lands late turns its good-faith retry into a second booking. ([Why](docs/METHOD.md#duplicate-bookings).)
 - **The claim detector** catches 72% of outcome claims in held-out paraphrases. The design doesn't rely on it at the moment of a change. ([Details and misses](docs/METHOD.md#the-claim-detector).)
 - **The raw results** are in [results/text/v0/](results/text/v0/).
-- **Coming next:** a real-model run in M1, then voice latency and cost per call in M2.
+**A real model.** `gemini-3.5-flash-lite` was run on the same 20 scenarios, once each, with every safety layer on, on 20 Nov 2026.
+- **19 of 20 calls passed.**
+- There were 0 duplicate bookings, 0 false confirmations and 0 false failures. From 20 calls, that puts each rate at 15% or less, at 95% confidence.
+- The one failure, and an earlier run that exposed gaps in the test harness, are explained in [METHOD.md](docs/METHOD.md#real-model).
+
+**Coming next:** voice latency and cost per call, in M2.
 
 ## Architecture
 

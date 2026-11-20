@@ -36,6 +36,11 @@ _CLARIFY = re.compile(r"\b(?:ya|or)\b|\sया\s|which day next week|अगल�
 _OFF_TASK_REPLY = re.compile(r"सिर्फ delivery|sirf delivery|only change delivery", re.IGNORECASE)
 _NO_CHANGE = re.compile(r"कोई change नहीं|koi change nahi|haven't changed", re.IGNORECASE)
 _GOODBYE = re.compile(r"धन्यवाद|शुभ हो|have a good day|thank you", re.IGNORECASE)
+# The agent wrapping up: the caller says goodbye rather than asking for more.
+_ANYTHING_ELSE = re.compile(
+    r"\banything else\b|\bkuch aur\b|\baur kuch\b|\bkoi aur (?:madad|sawal)\b|कुछ और|और कुछ",
+    re.IGNORECASE,
+)
 
 
 @dataclass(frozen=True)
@@ -192,6 +197,7 @@ class ScriptedCaller:
             )  # a stated slot ends a call only if nothing was asked
             or _NO_CHANGE.search(text)
             or _GOODBYE.search(text)
+            or _ANYTHING_ELSE.search(text)
         ):
             return self._close(seq)
 
