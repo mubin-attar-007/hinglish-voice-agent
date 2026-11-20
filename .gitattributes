@@ -1,0 +1,17 @@
+# LF line endings in the repo and in every working copy (the project is developed on Windows).
+* text=auto eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.wav binary
+*.mp3 binary
+*.ogg binary
+*.webm binary
+*.mp4 binary
+*.onnx binary
+*.sqlite3 binary
