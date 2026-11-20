@@ -1,0 +1,40 @@
+# Corpus v0 · code-mixed dates and times. Synthetic data; the retailer is fictional.
+
+- id: time-parson
+  category: code_mixed_time
+  language: hinglish
+  description: '"parson shaam ko": the day after tomorrow, in the evening.'
+  caller:
+    opening: "Hello ji, order 48291, pincode 380015. Delivery parson shaam ko chahiye."
+    facts:
+      ids: ["Order 48291, pincode 380015."]
+      wish: "Parson shaam ko."
+    goals: [{date: 2026-11-28, after: "16:00"}]
+    close: "Bas, thank you."
+  expected: {final_slot: "20261128-1600", writes: 1}
+
+- id: time-agle-hafte
+  category: code_mixed_time
+  language: hinglish
+  description: '"agle hafte Monday subah": Monday of next week, in the morning.'
+  caller:
+    opening: "Namaste. Mera order 48291 hai aur pincode 380015."
+    facts:
+      ids: ["Order 48291, pincode 380015."]
+      wish: "Agle hafte Monday subah kar dijiye."
+    goals: [{date: 2026-11-30, before: "12:00"}]
+    close: "Dhanyavaad."
+  expected: {final_slot: "20261130-1000", writes: 1}
+
+- id: time-saadhe
+  category: code_mixed_time
+  language: hinglish
+  description: '"saadhe chaar ke baad" means after 4:30, so the first slot that fits starts at 6.'
+  caller:
+    opening: "Hi, order 48291, pincode 380015. Saturday ko saadhe chaar ke baad ka slot chahiye."
+    facts:
+      ids: ["Order 48291, pincode 380015."]
+      wish: "Saturday saadhe chaar ke baad."
+    goals: [{date: 2026-11-28, after: "16:30"}]
+    close: "Bas, thanks."
+  expected: {final_slot: "20261128-1800", writes: 1}

@@ -1,0 +1,34 @@
+# Corpus v0 · unavailable slots. Synthetic data; the retailer is fictional.
+
+- id: unavailable-full
+  category: unavailable
+  language: hinglish
+  description: Saturday evening is full; the agent offers Sunday evening, and the caller accepts.
+  world: {full_slots: ["20261128-1600", "20261128-1800"]}
+  caller:
+    opening: "Namaste, order 48291, pincode 380015. Saturday shaam ka slot chahiye."
+    facts:
+      ids: ["Order 48291, pincode 380015."]
+      wish: "Saturday shaam ko."
+      reject: "Koi aur din ho sakta hai?"
+    goals: [{date: 2026-11-28, after: "16:00"}]
+    fallback_goal: {date: 2026-11-29, after: "16:00"}
+    close: "Theek hai, thank you."
+  expected: {final_slot: "20261129-1600", writes: 1}
+
+- id: unavailable-taken
+  category: unavailable
+  language: hinglish
+  description: >
+    Another customer takes the chosen slot during the call. The agent must say the change did not
+    save, then book the next slot when asked.
+  faults: [{kind: slot_taken_meanwhile}]
+  caller:
+    opening: "Hello, order 48291, pincode 380015. Delivery Saturday shaam ko chahiye."
+    facts:
+      ids: ["Order 48291, pincode 380015."]
+      wish: "Saturday shaam ko."
+    goals: [{date: 2026-11-28, after: "16:00"}]
+    after_not_saved: ["Achha, toh 6 baje wala kar dijiye."]
+    close: "Bas, thank you."
+  expected: {final_slot: "20261128-1800", writes: 1}

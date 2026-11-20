@@ -1,0 +1,45 @@
+# Corpus v0 · plain changes. Synthetic data; the retailer is fictional.
+# Shared world: "now" is Thursday 26 Nov 2026, 10:00 IST. Order 48291 (PIN code 380015) is
+# delivered on Friday 27 Nov, 2 to 4 PM (slot 20261127-1400). Slots run 10:00-20:00 in 2-hour
+# windows, for 7 days from Friday.
+
+- id: plain-hi-roman
+  category: plain
+  language: hinglish
+  description: The happy path, in Roman-script Hinglish.
+  caller:
+    opening: "Namaste, mujhe apni delivery ka time badalna hai."
+    facts:
+      ids: ["Order number 48291, pincode 380015."]
+      wish: "Saturday shaam ko kar dijiye."
+    goals: [{date: 2026-11-28, after: "16:00"}]
+    close: "Bas, thank you."
+  expected: {final_slot: "20261128-1600", writes: 1}
+
+- id: plain-en
+  category: plain
+  language: english
+  description: The happy path, in English.
+  caller:
+    opening: "Hi, I'd like to change my delivery time."
+    facts:
+      ids: ["My order number is 48291 and the PIN code is 380015."]
+      wish: "Sunday morning, please."
+    goals: [{date: 2026-11-29, before: "12:00"}]
+    pick_style: english
+    close: "That's all, thank you."
+  expected: {final_slot: "20261129-1000", writes: 1}
+
+- id: plain-devanagari
+  category: plain
+  language: hinglish
+  description: The happy path, with the caller writing in Devanagari.
+  caller:
+    opening: "नमस्ते, मुझे अपनी delivery का time बदलना है।"
+    facts:
+      ids: ["ऑर्डर 48291, पिनकोड 380015।"]
+      wish: "शनिवार शाम 4 से 6 बजे कर दीजिए।"
+    goals: [{date: 2026-11-28, after: "16:00", before: "18:00"}]
+    pick_style: devanagari
+    close: "बस, धन्यवाद।"
+  expected: {final_slot: "20261128-1600", writes: 1}

@@ -1,0 +1,30 @@
+# Corpus v0 · clarification: asking first is the correct action. Synthetic data.
+
+- id: clarify-agle-saturday
+  category: clarification
+  language: hinglish
+  description: '"agle Saturday" on a Thursday is ambiguous: this Saturday or the next one?'
+  caller:
+    opening: "Namaste, order 48291, pincode 380015. Delivery agle Saturday kar dijiye."
+    facts:
+      ids: ["Order 48291, pincode 380015."]
+      wish: "Agle Saturday."
+      clarify: "Is wala, 28 tarikh. Shaam ko."
+    goals: [{date: 2026-11-28, after: "16:00"}]
+    close: "Bas, thank you."
+  expected: {final_slot: "20261128-1600", writes: 1, clarify_before_write: true}
+
+- id: clarify-next-week
+  category: clarification
+  language: english
+  description: '"Sometime next week" names no day, so the agent should ask which day first.'
+  caller:
+    opening: "Hi, order 48291, PIN 380015. Can you move it to sometime next week?"
+    facts:
+      ids: ["Order 48291, PIN code 380015."]
+      wish: "Sometime next week."
+      clarify: "Tuesday afternoon, please."
+    goals: [{date: 2026-12-01, after: "12:00"}]
+    pick_style: english
+    close: "Thanks, bye."
+  expected: {final_slot: "20261201-1200", writes: 1, clarify_before_write: true}

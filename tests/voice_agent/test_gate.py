@@ -196,6 +196,16 @@ def test_stating_the_current_slot_before_any_change_is_rendered_from_the_record(
     assert verdict.agreed is True
 
 
+def test_saying_nothing_changed_before_any_change_is_rendered_as_the_current_slot() -> None:
+    """A cancelled change: "I haven't changed anything" is true, so it must not be blocked."""
+    g = gate()
+    verdict = g.check("ठीक है, मैंने कोई change नहीं किया।")
+    assert verdict.action is Action.REWRITE
+    assert verdict.meaning is ClaimKind.STATE_SLOT
+    assert verdict.meaning_slot_id == FRI_2PM.slot_id
+    assert verdict.agreed is True
+
+
 def test_a_claim_with_no_record_at_all_is_blocked() -> None:
     g = ConfirmationGate(language="hinglish", now=lambda: NOW)
     g.start_turn("hello")

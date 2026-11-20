@@ -147,18 +147,22 @@ class ConfirmationGate:
         if state.record is None:
             return Verdict(Action.BLOCK, hold, "no_record", claim)
         if state.write is WriteState.NONE:
-            if claim.kind is ClaimKind.STATE_SLOT:
-                slot = state.record.slot
-                return Verdict(
-                    Action.REWRITE,
-                    templates.current(slot, self.language),
-                    "render_current",
-                    claim,
-                    ClaimKind.STATE_SLOT,
-                    slot.slot_id,
-                    agreed=describes_slot(claim.when, slot.day, slot.start, slot.end) is not False,
-                )
-            return Verdict(Action.BLOCK, hold, "premature", claim)
+            if claim.kind is ClaimKind.CONFIRM:
+                return Verdict(Action.BLOCK, hold, "premature", claim)
+            # Stating the slot, or saying nothing changed: true or not, the record says it.
+            slot = state.record.slot
+            agreed = claim.kind is ClaimKind.FAIL or (
+                describes_slot(claim.when, slot.day, slot.start, slot.end) is not False
+            )
+            return Verdict(
+                Action.REWRITE,
+                templates.current(slot, self.language),
+                "render_current",
+                claim,
+                ClaimKind.STATE_SLOT,
+                slot.slot_id,
+                agreed=agreed,
+            )
         outcome = self.outcome_sentence()
         if outcome is None:
             return Verdict(Action.BLOCK, hold, "not_fresh", claim, needs_read=True)

@@ -1,6 +1,9 @@
 # Hinglish voice agent
 
-> **Status: early build (milestone M0 of M4).** There is no demo and there are no results yet. Every number this project publishes will come with its method, sample, date and scope.
+> **Status: milestone M1 of M4 (text mode).**
+> - There is no live demo yet.
+> - The results so far come from mocked models only, and are labelled that way.
+> - Every number this project publishes comes with its method, sample, date and scope.
 
 A voice agent that changes a delivery slot over a live call in Hinglish. It never double-books and never falsely confirms the change, even when the booking service times out after saving.
 
@@ -30,15 +33,24 @@ Not live yet. A public demo and a captioned recording are planned for milestones
 
 ## Results
 
-None yet. This section will hold one table with these measures:
+**So far: milestone M1, text mode, mocked models only.**
+- A mocked model is a rule-based test double.
+- `mock-reckless` misbehaves on purpose. It says "done" too early, retries blindly, says "it failed" when it didn't, names the wrong slot, and sends two writes at once.
+- These numbers show what the safety layers stop. They say nothing about how good a real model is.
 
-- task success (pass@1 and pass^k);
-- duplicate bookings, false confirmations and false failures;
-- barge-in stop latency and voice-to-voice latency;
-- accuracy on code-mixed dates and times;
-- cost per call.
+**Sample:** corpus v0 (20 synthetic scenarios), faults on, each scenario run 3 times, so 60 calls per row. Checked 20 Nov 2026. [Method](docs/METHOD.md#false-confirmations).
 
-Each number will link to its method in [docs/METHOD.md](docs/METHOD.md), with its sample, date and scope. The failures will be published next to the wins.
+| Mock model | Safety layers | Calls passed | Duplicate writes | False confirmations | False failures |
+|---|---|---|---|---|---|
+| `mock-reckless` | on | 60 / 60 | 0 | 0 | 0 |
+| `mock-reckless` | off | 3 / 60 | 13 | 92 | 58 |
+| `mock-competent` | off | 57 / 60 | 3 | 0 | 0 |
+
+- **What 0 means here:** with the layers on, 0 in 60 calls bounds each rate below 5% (rule of three) for this mock.
+- **The well-behaved mock still double-books without the layers.** A write that lands late turns its good-faith retry into a second booking. ([Why](docs/METHOD.md#duplicate-bookings).)
+- **The claim detector** catches 72% of outcome claims in held-out paraphrases. The design doesn't rely on it at the moment of a change. ([Details and misses](docs/METHOD.md#the-claim-detector).)
+- **The raw results** are in [results/text/v0/](results/text/v0/).
+- **Coming next:** a real-model run in M1, then voice latency and cost per call in M2.
 
 ## Architecture
 
@@ -73,10 +85,14 @@ You need Python 3.12 and [uv](https://docs.astral.sh/uv/).
 
 ```sh
 uv sync
-uv run pytest
+uv run pytest                                   # unit tests, plus the M1 smoke run
+uv run python -m evals.harness.run --llm mock-reckless --safety full     # the guarantee
+uv run python -m evals.harness.run --llm mock-reckless --safety baseline # without it
+uv run python -m evals.harness.run --show interrupt-demo                  # one transcript
+uv run python -m evals.bank                     # the claim detector on the sentence bank
 ```
 
-The text-mode agent and the evaluation harness arrive in milestone M1, and the voice pipeline in M2.
+None of these needs an API key or the network. The voice pipeline arrives in milestone M2.
 
 ## Limitations and failures
 
