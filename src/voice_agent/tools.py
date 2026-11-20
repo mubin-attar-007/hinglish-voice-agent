@@ -19,7 +19,7 @@ from dataclasses import dataclass, fields, replace
 from datetime import date, time
 from typing import Any
 
-from orders.models import OrderServiceError, OrderServiceTimeout, OrderView, Slot
+from orders.models import OrderNotFound, OrderServiceError, OrderServiceTimeout, OrderView, Slot
 from orders.service import DEFAULT_CLIENT_TIMEOUT_MS, OrderService
 from voice_agent.gate import templates
 from voice_agent.gate.claims import ClaimKind
@@ -174,16 +174,23 @@ class ToolAdapter:
         self.read_attempts = read_attempts
         self.verified_order_id: str | None = None
         self._offered: set[str] = set()
-        self._seen: dict[str, ToolOutcome] = {}
+        self._seen: dict[tuple[str, str], ToolOutcome] = {}
         self._writes_per_response: Counter[str] = Counter()
 
     @property
     def specs(self) -> tuple[ToolSpec, ...]:
         return TOOL_SPECS
 
-    def execute(self, call: ToolCall, *, response_id: str = "") -> ToolOutcome:
-        if call.id and call.id in self._seen:
-            return replace(self._seen[call.id], duplicate_call=True)
+    def execute(self, call: ToolCall, *, response_id: str) -> ToolOutcome:
+        """Run one tool call from the model response `response_id`.
+
+        A repeated (response, call id) pair is a provider retry: its cached outcome is returned
+        and nothing runs again. Ids are scoped to the response, because some providers reuse
+        them across responses.
+        """
+        seen_key = (response_id, call.id)
+        if call.id and seen_key in self._seen:
+            return replace(self._seen[seen_key], duplicate_call=True)
         before = self.service.last_seq()
         say: str | None = None
         try:
@@ -201,7 +208,7 @@ class ToolAdapter:
             result = {"error": f"bad arguments for {call.name}: {exc}"}
         outcome = ToolOutcome(call, result, before, self.service.last_seq(), say)
         if call.id:
-            self._seen[call.id] = outcome
+            self._seen[seen_key] = outcome
         return outcome
 
     # ---- the tools ---------------------------------------------------------------------------
@@ -239,7 +246,7 @@ class ToolAdapter:
             return {"error": "verify the order with lookup_order first"}
         view = self._read(order_id)
         if view is None:
-            return {"error": "the order system did not answer"}
+            return {"error": "the order could not be read: no such order, or no answer"}
         return {"order": order_json(view)}
 
     def _reschedule(
@@ -327,6 +334,8 @@ class ToolAdapter:
         for attempt in range(self.read_attempts):
             try:
                 view = self.service.get_order(order_id, client_timeout_ms=self.client_timeout_ms)
+            except OrderNotFound:
+                return None
             except (OrderServiceTimeout, OrderServiceError):
                 if attempt + 1 < self.read_attempts:
                     self.service.clock.advance(READ_BACKOFF_MS)

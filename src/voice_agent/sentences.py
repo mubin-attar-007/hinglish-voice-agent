@@ -8,21 +8,9 @@ streamed deltas and, in M2, inside the voice pipeline.
 from __future__ import annotations
 
 _ENDINGS = ".?!।"
-_ABBREVIATIONS = {
-    "a.m",
-    "p.m",
-    "am",
-    "pm",
-    "dr",
-    "mr",
-    "mrs",
-    "ms",
-    "no",
-    "rs",
-    "approx",
-    "etc",
-    "vs",
-}
+_ABBREVIATIONS = {"dr", "mr", "mrs", "ms", "rs", "approx", "etc", "vs"}
+# "6 p.m. tak" goes on; "6 p.m. Which day?" starts a new sentence.
+_TIME_ABBREVIATIONS = {"a.m", "p.m"}
 
 
 class SentenceSplitter:
@@ -46,9 +34,23 @@ class SentenceSplitter:
                     j += 1
                 if j + 1 >= len(text):
                     break  # wait: more text may follow ("4." could become "4.30")
-                if not text[j + 1].isspace() or (char == "." and self._abbreviation(text, i)):
+                if not text[j + 1].isspace():
                     i = j + 1
                     continue
+                if char == ".":
+                    word = self._word_before(text, i)
+                    if word in _ABBREVIATIONS:
+                        i = j + 1
+                        continue
+                    if word in _TIME_ABBREVIATIONS:
+                        k = j + 1
+                        while k < len(text) and text[k].isspace():
+                            k += 1
+                        if k >= len(text):
+                            break  # wait: the next word decides
+                        if not text[k].isupper():
+                            i = j + 1
+                            continue
                 end = j + 1
             else:
                 i += 1
@@ -67,9 +69,9 @@ class SentenceSplitter:
         return [rest] if rest else []
 
     @staticmethod
-    def _abbreviation(text: str, dot: int) -> bool:
+    def _word_before(text: str, dot: int) -> str:
         word_start = max(text.rfind(" ", 0, dot), text.rfind("\n", 0, dot)) + 1
-        return text[word_start:dot].lower() in _ABBREVIATIONS
+        return text[word_start:dot].lower()
 
 
 def split_sentences(text: str) -> list[str]:

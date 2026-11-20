@@ -259,6 +259,7 @@ def normalise(text: str) -> str:
     text = text.translate(_DEVANAGARI_DIGITS)
     text = re.sub(r"[ऀ-ॿ]+", lambda m: _DEVANAGARI_WORDS.get(m.group(0), m.group(0)), text)
     text = text.lower().replace("’", "'")  # noqa: RUF001 (curly apostrophe, as typed on phones)
+    text = re.sub(r"\b([ap])\.\s?m\b\.?", r"\1m", text)  # "8 a.m." -> "8 am", before full stops go
     text = re.sub(r"(\d)\s*(am|pm)\b", r"\1 \2", text)
     text = re.sub(r"[,;!?।|()\"]+", " ", text)
     text = re.sub(r"(?<!\d)\.(?!\d)", " ", text)  # full stops, but not 4.30
@@ -441,9 +442,11 @@ def _date_from_number(number: int, month: int | None, today: date) -> date | Non
 def _resolve_pair(
     match: re.Match[str], pa: str, pb: str, part: str | None
 ) -> tuple[time | None, time | None]:
-    meridiem = match.group(f"{pb}ampm") or match.group(f"{pa}ampm")
-    first = _resolve(match, pa, part, meridiem)
-    second = _resolve(match, pb, part, meridiem)
+    own_first, own_second = match.group(f"{pa}ampm"), match.group(f"{pb}ampm")
+    second = _resolve(match, pb, part, own_second or own_first)
+    first = _resolve(match, pa, part, own_first or own_second)
+    if first and second and first >= second and not own_first:
+        first = _resolve(match, pa, part, None)  # "11 to 1 pm": the pm belongs to the 1 only
     if first and second and second <= first and second.hour < 12:
         second = time(second.hour + 12, second.minute) if second.hour + 12 < 24 else second
     return first, second

@@ -82,12 +82,21 @@ _UNCERTAIN = _patterns(
 )
 _UNCERTAIN_DEVANAGARI = ("एक second", "चेक कर", "देख रही", "देख रहा", "एक पल", "एक सेकंड")
 
-_OFFER = _patterns(
-    r"\b(?:kar doon|kar du|kar dun|karoon|karu|karun|chahiye|chahenge|chahengi|chahte|chahti)\b",
-    r"\b(?:would you like|shall i|should i|do you want|want me to|can i|kya main|kya aap)\b",
-    r"\b(?:batayein|bataiye|bataaiye|choose|chunein|pick|which|kaunsa|kaun sa|kaun si)\b",
-    r"\b(?:available|options|option|mil sakta|mil sakti|ho sakta|ho sakti|possible)\b",
+# A sentence that opens like this asks the caller something, so it claims nothing:
+# "Would you like it rescheduled to Saturday?", "Kya main ise book kar doon?"
+_QUESTION_OPENER = re.compile(
+    r"^(?:would you like|shall i|should i|do you want|want me to|can i|may i|could i|"
+    r"kya main|kya mai|kya hum|kya aap|kya ise|kya isko|kya ye|kya yeh)\b"
 )
+_QUESTION_OPENER_DEVANAGARI = ("क्या मैं", "क्या आप", "क्या इसे", "क्या हम")
+# A possibility or an offer, not a fact: "ho sakti hai", "kar doon".
+_MODAL = _patterns(
+    r"\b(?:kar doon|kar du|kar dun|karoon|karu|karun|chahiye|chahenge|chahengi|chahte|chahti)\b",
+    r"\b(?:mil sakta|mil sakti|ho sakta|ho sakti|kar sakti|kar sakta|can be|could be|might be|"
+    r"possible)\b",
+)
+_STARTS_WITH_YES = re.compile(r"^(?:haan ji|ji haan|haan|han|haa|ha|ji|jee|yes|bilkul|sure)\b")
+_STARTS_WITH_YES_DEVANAGARI = ("हाँ", "हां", "जी", "बिल्कुल")
 _ABOUT_DELIVERY = _patterns(
     r"\b(?:aapki|aapka|apki|apka|your|delivery|order|saaman|samaan|package|parcel)\b",
 )
@@ -98,8 +107,6 @@ _FACT_VERB = _patterns(
 )
 _FACT_VERB_DEVANAGARI = ("होगी", "होगा", "आएगी", "आएगा", "पहुंचेगी", "पहुँचेगी", "है")
 
-_BARE_YES = {"haan", "haan ji", "ji haan", "ji", "yes", "han", "ha", "haa", "bilkul", "sure",
-             "of course", "yes it is", "jee", "हाँ", "हां", "जी", "जी हाँ", "बिल्कुल"}  # fmt: skip
 _ASKS_IF_DONE = re.compile(
     r"(?:ho gaya|ho gayi|hua|done|confirm|booked|changed|हो गया|हुआ)[^?]*\?|"
     r"\b(?:kya|did|is it|has it)\b.*\b(?:ho gaya|hua|done|work|changed|booked)\b"
@@ -120,19 +127,23 @@ def classify(sentence: str, now: datetime, *, caller_last: str | None = None) ->
     norm = normalise(sentence)
     when = parse_when(sentence, now)
 
+    if _QUESTION_OPENER.match(norm) or raw.startswith(_QUESTION_OPENER_DEVANAGARI):
+        return Claim(ClaimKind.NONE, when, ("question",))
     fail = _hits(_FAIL, norm) + _hits_raw(_FAIL_DEVANAGARI, raw)
     if fail:
         return Claim(ClaimKind.FAIL, when, tuple(fail))
     confirm = _hits(_CONFIRM, norm) + _hits_raw(_CONFIRM_DEVANAGARI, raw)
     if confirm:
         return Claim(ClaimKind.CONFIRM, when, tuple(confirm))
-    bare = re.sub(r"[\s,.!।]+$", "", raw).strip()
-    if bare in _BARE_YES and caller_last and _ASKS_IF_DONE.search(caller_last.lower()):
-        return Claim(ClaimKind.CONFIRM, when, ("bare yes to: " + caller_last,))
+    starts_with_yes = bool(_STARTS_WITH_YES.match(norm)) or raw.startswith(
+        _STARTS_WITH_YES_DEVANAGARI
+    )
+    if starts_with_yes and caller_last and _ASKS_IF_DONE.search(caller_last.lower()):
+        return Claim(ClaimKind.CONFIRM, when, ("yes to: " + caller_last,))
     uncertain = _hits(_UNCERTAIN, norm) + _hits_raw(_UNCERTAIN_DEVANAGARI, raw)
     if uncertain:
         return Claim(ClaimKind.UNCERTAIN, when, tuple(uncertain))
-    is_question = raw.endswith("?") or bool(_hits(_OFFER, norm))
+    is_question = raw.endswith("?") or bool(_hits(_MODAL, norm))
     about = _hits(_ABOUT_DELIVERY, norm) + _hits_raw(_ABOUT_DELIVERY_DEVANAGARI, raw)
     fact = _hits(_FACT_VERB, norm) + _hits_raw(_FACT_VERB_DEVANAGARI, raw)
     if when.mentions_anything and about and fact and not is_question:

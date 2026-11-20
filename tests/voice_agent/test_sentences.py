@@ -39,6 +39,15 @@ def test_streaming_in_random_chunks_gives_the_same_sentences(seed: int) -> None:
     assert sentences == EXPECTED
 
 
+def test_pm_ends_a_sentence_but_p_m_continues_one() -> None:
+    assert split_sentences("Your delivery is on Saturday between 4 and 6 PM. Which day?") == [
+        "Your delivery is on Saturday between 4 and 6 PM.",
+        "Which day?",
+    ]
+    assert split_sentences("Saturday 6 p.m. Which day?") == ["Saturday 6 p.m.", "Which day?"]
+    assert split_sentences("Delivery 6 p.m. tak hogi.") == ["Delivery 6 p.m. tak hogi."]
+
+
 def test_a_trailing_full_stop_waits_for_more_text() -> None:
     splitter = SentenceSplitter()
     assert splitter.feed("Delivery 4.") == []  # could still become "4.30"

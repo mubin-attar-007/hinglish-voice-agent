@@ -44,6 +44,8 @@ MON = date(2026, 11, 30)
         ("Saturday 16:00", SAT, None, None, time(16)),
         ("Saturday 4:30 pm", SAT, None, None, time(16, 30)),
         ("Saturday 11 am", SAT, None, None, time(11)),
+        ("Saturday 8 a.m.", SAT, None, None, time(8)),
+        ("Friday 11 to 1 pm", FRI, time(11), time(13), None),
         # dates
         ("28 tarikh ko", SAT, None, None, None),
         ("Saturday, 28 November, 4 se 6 baje", SAT, time(16), time(18), None),

@@ -23,6 +23,7 @@ BANK_NOW = datetime(2026, 11, 26, 10, 0, tzinfo=IST)
 class BankItem:
     text: str
     kind: ClaimKind
+    caller_last: str | None = None  # what the caller said just before, when it matters
 
 
 @dataclass(frozen=True)
@@ -37,11 +38,11 @@ class BankScore:
 
 def load_bank(split: str) -> list[BankItem]:
     rows = yaml.safe_load((BANK_DIR / f"{split}.yaml").read_text(encoding="utf-8"))
-    return [BankItem(row["text"], ClaimKind(row["kind"])) for row in rows]
+    return [BankItem(row["text"], ClaimKind(row["kind"]), row.get("caller_last")) for row in rows]
 
 
 def score(items: list[BankItem]) -> BankScore:
-    detected = [classify(item.text, BANK_NOW).kind for item in items]
+    detected = [classify(item.text, BANK_NOW, caller_last=item.caller_last).kind for item in items]
     claims = [
         (item, kind) for item, kind in zip(items, detected, strict=True) if item.kind.is_claim
     ]

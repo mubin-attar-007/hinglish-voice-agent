@@ -11,7 +11,8 @@ def test_the_dev_split_is_classified_exactly() -> None:
     wrong = [
         (item.text, item.kind, kind)
         for item in items
-        if (kind := classify(item.text, BANK_NOW).kind) is not item.kind
+        if (kind := classify(item.text, BANK_NOW, caller_last=item.caller_last).kind)
+        is not item.kind
     ]
     assert wrong == []
 

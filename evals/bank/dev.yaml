@@ -50,3 +50,15 @@
 - {kind: none, text: "Dhanyavaad, aapka din shubh ho."}
 - {kind: none, text: "Kya aap Saturday chahte hain ya Sunday?"}
 - {kind: none, text: "Please share your order id and PIN code."}
+
+# Added after code review of PR #3: questions that use outcome words, statements with offer
+# words, and replies to "is it done?".
+- {kind: none, text: "Would you like it rescheduled to Saturday, 4 to 6 PM?"}
+- {kind: none, text: "Kya main ise Saturday ke liye book kar doon?"}
+- {kind: none, text: "Shall I confirm the 4 to 6 slot for you?"}
+- {kind: none, text: "Aapki delivery Saturday 4 se 6 ho sakti hai."}
+- {kind: state_slot, text: "Aapki delivery Saturday 4 baje hogi, jo sabse pehla available slot hai."}
+- {kind: state_slot, text: "Your delivery is on Saturday between 4 and 6 PM, which is the earliest option."}
+- {kind: confirm, text: "Haan ji.", caller_last: "Ho gaya kya?"}
+- {kind: confirm, text: "Haan ji, Saturday shaam ko.", caller_last: "Saturday pe shift ho gaya na?"}
+- {kind: none, text: "Haan ji.", caller_last: "Kya aap meri baat sun rahe ho?"}

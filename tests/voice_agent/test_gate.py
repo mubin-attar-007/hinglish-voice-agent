@@ -72,6 +72,33 @@ def test_sentences_without_claims_pass_unchanged() -> None:
         assert verdict.text == sentence
 
 
+def test_a_question_that_uses_outcome_words_is_not_blocked() -> None:
+    """The demo's step 3: the agent must be able to ask before it changes anything."""
+    g = gate(language="english")
+    for question in (
+        "Would you like it rescheduled to Saturday, 4 to 6 PM?",
+        "Shall I confirm the 4 to 6 slot for you?",
+    ):
+        assert g.check(question).action is Action.ALLOW, question
+
+
+def test_a_yes_that_names_a_slot_is_a_confirmation_when_the_caller_asked() -> None:
+    g = gate()
+    g.observe_write_started(SAT_4PM.slot_id, seq=5)
+    g.observe_write_lost()
+    g.start_turn("Saturday pe shift ho gaya na?")
+    assert g.check("Haan ji, Saturday shaam ko.").action is Action.BLOCK
+
+
+def test_a_slot_statement_with_offer_words_is_still_checked() -> None:
+    g = gate(language="english")
+    verdict = g.check(
+        "Your delivery is on Saturday between 4 and 6 PM, which is the earliest option."
+    )
+    assert verdict.action is Action.REWRITE  # rendered from the record: it is on Friday
+    assert verdict.agreed is False
+
+
 def test_a_confirmation_before_any_change_is_blocked_as_premature() -> None:
     g = gate()
     verdict = g.check("Ho gaya! Aapki delivery Saturday 4 se 6 kar di hai.")

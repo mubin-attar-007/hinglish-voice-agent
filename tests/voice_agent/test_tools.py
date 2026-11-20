@@ -117,14 +117,37 @@ def test_if_the_record_cannot_be_read_the_outcome_is_unknown_and_unsaid() -> Non
     assert "can't confirm" in str(result["say_this"])
 
 
-def test_a_repeated_tool_call_id_is_not_run_twice() -> None:
+def test_a_repeated_tool_call_in_the_same_response_is_not_run_twice() -> None:
     adapter = make()
     ready(adapter)
     tool_call = ToolCall("same-id", "reschedule", {"order_id": ORDER, "slot_id": SAT_4PM})
     adapter.execute(tool_call, response_id="r1")
-    repeat = adapter.execute(tool_call, response_id="r2")
+    repeat = adapter.execute(tool_call, response_id="r1")
     assert repeat.duplicate_call is True
     assert commits(adapter) == 1
+
+
+def test_a_call_id_reused_in_a_later_response_is_a_new_call() -> None:
+    """Some providers reuse ids across responses: a later change must not get an old answer."""
+    adapter = make()
+    ready(adapter)
+    adapter.execute(
+        ToolCall("call_0", "reschedule", {"order_id": ORDER, "slot_id": SAT_4PM}), response_id="r1"
+    )
+    back = adapter.execute(
+        ToolCall("call_0", "reschedule", {"order_id": ORDER, "slot_id": FRI_2PM}), response_id="r2"
+    )
+    assert back.duplicate_call is False
+    assert back.result["status"] == "saved"
+    assert "Friday" in str(back.say)
+    assert commits(adapter) == 2
+
+
+def test_an_unknown_order_id_is_an_error_not_a_crash_even_without_preconditions() -> None:
+    adapter = make(safety=SafetyConfig.baseline())
+    assert "error" in call(adapter, "get_order", order_id="99999")
+    result = call(adapter, "reschedule", order_id="99999", slot_id=SAT_4PM)
+    assert result == {"status": "order_not_found"}
 
 
 def test_a_genuine_change_of_mind_writes_each_time() -> None:
