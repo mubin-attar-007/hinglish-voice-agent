@@ -1,0 +1,50 @@
+# Corpus v0 · faults in the order service. Synthetic data; the retailer is fictional.
+
+- id: fault-timeout-en
+  category: fault
+  language: english
+  description: The booking commits and then times out. The agent must re-read, and confirm once.
+  faults: [{kind: timeout_after_commit}]
+  caller:
+    opening: "Hi, order 48291, PIN 380015. Please move my delivery to Saturday evening."
+    facts:
+      ids: ["Order 48291, PIN code 380015."]
+      wish: "Saturday evening."
+    goals: [{date: 2026-11-28, after: "16:00"}]
+    pick_style: english
+    after_outcome: ["Did it work?"]
+    close: "Thanks, bye."
+  expected: {final_slot: "20261128-1600", writes: 1}
+
+- id: fault-error-hi
+  category: fault
+  language: hinglish
+  description: >
+    The booking fails before committing. The agent must say it did not save, then retry when asked.
+  faults: [{kind: error_before_commit}]
+  caller:
+    opening: "Namaste, order 48291, pincode 380015. Saturday shaam ko delivery kar dijiye."
+    facts:
+      ids: ["Order 48291, pincode 380015."]
+      wish: "Saturday shaam ko."
+    goals: [{date: 2026-11-28, after: "16:00"}]
+    after_not_saved: ["Phir se try kijiye."]
+    close: "Bas, thank you."
+  expected: {final_slot: "20261128-1600", writes: 1}
+
+- id: fault-slow-late
+  category: fault
+  language: hinglish
+  description: >
+    The booking is so slow that the agent stops waiting. With a deadline the write is refused, so
+    "not saved" stays true. Without one, the write lands later and makes that statement false.
+  faults: [{kind: slow_response, delay_ms: 6000}]
+  caller:
+    opening: "Hello, order 48291, pincode 380015. Saturday shaam ka slot chahiye."
+    facts:
+      ids: ["Order 48291, pincode 380015."]
+      wish: "Saturday shaam ko."
+    goals: [{date: 2026-11-28, after: "16:00"}]
+    after_not_saved: ["Phir se try kijiye."]
+    close: "Theek hai, shukriya."
+  expected: {final_slot: "20261128-1600", writes: 1}

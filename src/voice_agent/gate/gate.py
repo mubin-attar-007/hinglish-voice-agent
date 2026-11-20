@@ -144,21 +144,25 @@ class ConfirmationGate:
             return Verdict(Action.ALLOW, sentence, "no_claim", claim)
         state = self.state
         hold = templates.holding(self.language)
+        if claim.kind is ClaimKind.FAIL and state.write is WriteState.NONE:
+            # Nothing was attempted, so "it didn't happen" can't be a false failure. It is often
+            # the real news: "I couldn't find that order", "that slot isn't available".
+            return Verdict(Action.ALLOW, sentence, "nothing_attempted", claim)
         if state.record is None:
             return Verdict(Action.BLOCK, hold, "no_record", claim)
         if state.write is WriteState.NONE:
-            if claim.kind is ClaimKind.STATE_SLOT:
-                slot = state.record.slot
-                return Verdict(
-                    Action.REWRITE,
-                    templates.current(slot, self.language),
-                    "render_current",
-                    claim,
-                    ClaimKind.STATE_SLOT,
-                    slot.slot_id,
-                    agreed=describes_slot(claim.when, slot.day, slot.start, slot.end) is not False,
-                )
-            return Verdict(Action.BLOCK, hold, "premature", claim)
+            if claim.kind is ClaimKind.CONFIRM:
+                return Verdict(Action.BLOCK, hold, "premature", claim)
+            slot = state.record.slot  # a stated slot, before any change: the record says it
+            return Verdict(
+                Action.REWRITE,
+                templates.current(slot, self.language),
+                "render_current",
+                claim,
+                ClaimKind.STATE_SLOT,
+                slot.slot_id,
+                agreed=describes_slot(claim.when, slot.day, slot.start, slot.end) is not False,
+            )
         outcome = self.outcome_sentence()
         if outcome is None:
             return Verdict(Action.BLOCK, hold, "not_fresh", claim, needs_read=True)

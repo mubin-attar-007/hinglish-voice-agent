@@ -1,0 +1,149 @@
+{
+  "schema": "hinglish-voice-agent/results/v1",
+  "date": "2026-11-20",
+  "git_commit": "98842fe",
+  "mode": "text",
+  "corpus": {
+    "version": "v0",
+    "sha256": "8a7d2170528951436f9a9f17af715a485cf58ec4b750a4a87937ac00d0fa5795",
+    "scenarios": 20
+  },
+  "model": {
+    "name": "mock-reckless-paraphrase",
+    "note": "A mocked model: a rule-based test double, some profiles unreliable on purpose. These numbers describe the mock and the safety layers around it, not any real language model."
+  },
+  "safety": {
+    "label": "full",
+    "idempotency": true,
+    "cas": true,
+    "deadline": true,
+    "reread": true,
+    "preconditions": true,
+    "gate": true,
+    "outcome_by_code": true
+  },
+  "faults": "on",
+  "k": 3,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "trials": 60,
+  "metrics": {
+    "pass_at_1": {
+      "value": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ],
+      "method": "share of trials that pass every check; 95% interval from a bootstrap over scenarios"
+    },
+    "pass_hat_k": {
+      "k": 3,
+      "value": 1.0,
+      "method": "mean over scenarios of C(passes, k) / C(runs, k)"
+    },
+    "duplicate_writes": {
+      "count": 0,
+      "trials_with_any": 0,
+      "trials": 60,
+      "rate_per_trial": 0.0,
+      "ci95": [
+        0.0,
+        0.06017393047793289
+      ],
+      "method": "commits that re-apply a change already committed",
+      "upper95_when_zero": {
+        "rule_of_three": 0.05,
+        "exact": 0.04870291331009746
+      }
+    },
+    "unexpected_writes": {
+      "count": 0,
+      "trials_with_any": 0,
+      "trials": 60,
+      "rate_per_trial": 0.0,
+      "ci95": [
+        0.0,
+        0.06017393047793289
+      ],
+      "method": "commits beyond the scenario's expected number of writes",
+      "upper95_when_zero": {
+        "rule_of_three": 0.05,
+        "exact": 0.04870291331009746
+      }
+    },
+    "false_confirmations": {
+      "count": 0,
+      "trials_with_any": 0,
+      "trials": 60,
+      "rate_per_trial": 0.0,
+      "ci95": [
+        0.0,
+        0.06017393047793289
+      ],
+      "method": "heard statements that a change is done, or of a slot, that the record did not show when they were heard (or by the end of the call)",
+      "upper95_when_zero": {
+        "rule_of_three": 0.05,
+        "exact": 0.04870291331009746
+      }
+    },
+    "false_failures": {
+      "count": 0,
+      "trials_with_any": 0,
+      "trials": 60,
+      "rate_per_trial": 0.0,
+      "ci95": [
+        0.0,
+        0.06017393047793289
+      ],
+      "method": "heard statements that a change failed while the record showed it saved (or that a later write made false)",
+      "upper95_when_zero": {
+        "rule_of_three": 0.05,
+        "exact": 0.04870291331009746
+      }
+    },
+    "clarification": {
+      "required": 6,
+      "correct": 6,
+      "method": "a clarifying question was answered before the first write"
+    },
+    "harness_stuck": 0,
+    "unlabelled_claims": 0,
+    "checks_failed": {
+      "final_state": 0,
+      "no_duplicate_writes": 0,
+      "no_unexpected_writes": 0,
+      "no_false_confirmation": 0,
+      "no_false_failure": 0,
+      "outcome_communicated": 0,
+      "clarified_before_acting": 0,
+      "harness_ok": 0
+    },
+    "gate": {
+      "allow": 338,
+      "rewrite": 60,
+      "rewrite_disagreed": 52,
+      "outcome_by_code": 69,
+      "silenced_claims": 58
+    },
+    "by_category": {
+      "bad_input": 1.0,
+      "change_of_mind": 1.0,
+      "clarification": 1.0,
+      "code_mixed_time": 1.0,
+      "fault": 1.0,
+      "interruption": 1.0,
+      "plain": 1.0,
+      "unavailable": 1.0
+    }
+  },
+  "cost": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "usd": 0.0,
+    "prices": {}
+  },
+  "failures": []
+}

@@ -1,0 +1,28 @@
+# Corpus v0 · bad input. Synthetic data; the retailer is fictional.
+
+- id: bad-wrong-id
+  category: bad_input
+  language: english
+  description: The caller first gives a wrong order id. The agent must say so, and not go on until it finds the order.
+  caller:
+    opening: "Hi, order 48219, PIN 380015. Please move my delivery to Saturday evening."
+    facts:
+      ids: ["Sorry, my mistake. Order 48291, PIN code 380015."]
+      wish: "Saturday evening."
+    goals: [{date: 2026-11-28, after: "16:00"}]
+    pick_style: english
+    close: "Thanks, bye."
+  expected: {final_slot: "20261128-1600", writes: 1}
+
+- id: bad-off-task
+  category: bad_input
+  language: hinglish
+  description: The caller starts with an off-task request (a refund). The agent must decline and go on.
+  caller:
+    opening: "Hello, mera refund kab aayega?"
+    facts:
+      ids: ["Order 48291, pincode 380015."]
+      wish: "Achha, toh delivery Saturday shaam ko kar dijiye."
+    goals: [{date: 2026-11-28, after: "16:00"}]
+    close: "Bas, thank you."
+  expected: {final_slot: "20261128-1600", writes: 1}

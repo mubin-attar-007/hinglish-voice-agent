@@ -196,6 +196,22 @@ def test_stating_the_current_slot_before_any_change_is_rendered_from_the_record(
     assert verdict.agreed is True
 
 
+def test_a_failure_before_any_change_was_attempted_is_let_through() -> None:
+    """Nothing was attempted, so it can't be a false failure, and it is often the real news."""
+    g = gate()
+    for sentence in (
+        "ठीक है, मैंने कोई change नहीं किया।",  # a cancelled change
+        "Woh slot book nahi ho sakta.",
+    ):
+        verdict = g.check(sentence)
+        assert verdict.action is Action.ALLOW, sentence
+        assert verdict.rule == "nothing_attempted"
+    no_order = ConfirmationGate(language="english", now=lambda: NOW)
+    no_order.start_turn("Order 48219, PIN 380015.")
+    verdict = no_order.check("I couldn't find that order.")  # before any record exists
+    assert verdict.action is Action.ALLOW
+
+
 def test_a_claim_with_no_record_at_all_is_blocked() -> None:
     g = ConfirmationGate(language="hinglish", now=lambda: NOW)
     g.start_turn("hello")

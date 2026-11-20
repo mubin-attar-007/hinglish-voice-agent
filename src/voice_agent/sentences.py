@@ -63,6 +63,11 @@ class SentenceSplitter:
         self._buffer = text[start:]
         return sentences
 
+    @property
+    def pending(self) -> str:
+        """Text fed but not yet part of a complete sentence."""
+        return self._buffer.strip()
+
     def flush(self) -> list[str]:
         """The rest of the text, at the end of the model's response."""
         rest, self._buffer = self._buffer.strip(), ""

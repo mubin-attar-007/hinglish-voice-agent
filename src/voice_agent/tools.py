@@ -38,6 +38,7 @@ class SafetyConfig:
     reread: bool = True  # read the record after every write attempt
     preconditions: bool = True  # verified order, offered slot, one write per response
     gate: bool = True  # enforce the gate; off means observe only
+    outcome_by_code: bool = True  # after a write, code speaks the outcome; the model does not
 
     @classmethod
     def baseline(cls) -> SafetyConfig:
@@ -313,6 +314,12 @@ class ToolAdapter:
         return result, outcome.text
 
     # ---- helpers -----------------------------------------------------------------------------
+
+    def refresh(self) -> OrderView | None:
+        """Read the verified order's record now: the gate asks for this before it answers."""
+        if self.verified_order_id is None:
+            return None
+        return self._read(self.verified_order_id)
 
     def _precondition_problem(self, order_id: str, slot_id: str, response_id: str) -> str | None:
         if not self.safety.preconditions:

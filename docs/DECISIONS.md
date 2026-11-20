@@ -24,6 +24,9 @@ This file holds the project's technical decisions, and the versions and prices t
 | 2026-11-20 | Sentences about the outcome are rendered from the record by code, and the model's own outcome claims are always replaced | The model proposes the change, and the code confirms it |
 | 2026-11-20 | The gate checks the reply one sentence at a time, before text-to-speech | The same function runs in text mode and inside Pipecat's `LLMTextProcessor` |
 | 2026-11-20 | External reference: τ-bench 2.0.0. Novelty is claimed only for code-mixed Hinglish with fault-injected checks against the system of record | τ-bench 2.0.0 already covers Hindi, in text and in voice |
+| 2026-11-20 | After a write, code speaks the outcome, and a model response that makes a change says nothing of its own | The held-out sentence bank shows the detector misses 28% of paraphrased claims, and a mock exploited that before its retry landed. This keeps the moment of a change independent of detection. See [METHOD.md](METHOD.md#false-confirmations) |
+| 2026-11-20 | Mock models label every sentence with what it really claims, and graders use those labels as ground truth | A claim the detector misses still counts against the agent, so mock results can't flatter the detector |
+| 2026-11-20 | "Faults on" adds a timeout after commit to the first reschedule of every scenario that has no reschedule fault of its own | Most writes in a faults-on run then lose their answer, which is the hardest case for the guarantee |
 
 ## Verified facts
 

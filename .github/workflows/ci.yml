@@ -42,3 +42,8 @@ jobs:
 
       - name: Tests
         run: uv run pytest
+
+      - name: Eval smoke test (corpus v0, mocked model, no network)
+        run: |
+          uv run python -m evals.harness.run --llm mock-reckless --safety full --faults on --k 3 --require-guarantee
+          uv run python -m evals.harness.run --llm mock-reckless --safety baseline --faults on --k 3 --require-violations

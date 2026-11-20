@@ -1,0 +1,29 @@
+# Corpus v0 · changes of mind. Synthetic data; the retailer is fictional.
+
+- id: mind-two-changes
+  category: change_of_mind
+  language: hinglish
+  description: The caller changes the slot, then changes it again. Two writes are correct here.
+  caller:
+    opening: "Namaste, order 48291, pincode 380015. Saturday shaam ko kar dijiye."
+    facts:
+      ids: ["Order 48291, pincode 380015."]
+      wish: "Saturday shaam ko."
+    goals: [{date: 2026-11-28, after: "16:00"}, {date: 2026-11-29, before: "12:00"}]
+    after_outcome: ["Sorry, ek aur change. Sunday subah kar dijiye."]
+    close: "Bas, ab theek hai. Thank you."
+  expected: {final_slot: "20261129-1000", writes: 2}
+
+- id: mind-cancel
+  category: change_of_mind
+  language: hinglish
+  description: The caller hears the offer and keeps the original slot. No write is correct.
+  caller:
+    opening: "Hello, order 48291, pincode 380015. Saturday shaam ka slot dekh lijiye."
+    facts:
+      ids: ["Order 48291, pincode 380015."]
+      wish: "Saturday shaam ko."
+    triggers:
+      - {when: slot_offer, nth: 1, say: "Rehne dijiye, Friday hi theek hai."}
+    close: "Haan, thank you."
+  expected: {final_slot: unchanged, writes: 0}

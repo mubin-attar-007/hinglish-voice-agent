@@ -1,0 +1,51 @@
+# Corpus v0 · interruptions. Synthetic data; the retailer is fictional.
+
+- id: interrupt-demo
+  category: interruption
+  language: hinglish
+  description: >
+    The demo. The caller asks for Friday evening, interrupts the agent's offer with "Friday nahi,
+    Saturday chaar baje ke baad", picks a slot, and the booking commits and then times out.
+  faults: [{kind: timeout_after_commit}]
+  caller:
+    opening: "Hello, mera order 48291 hai, pincode 380015. Delivery Friday shaam ko kar dijiye."
+    facts:
+      ids: ["Order 48291, pincode 380015."]
+      wish: "Friday shaam ko."
+    goals: [{date: 2026-11-28, after: "16:00"}]
+    triggers:
+      - {when: slot_offer, nth: 1, interrupt_at_word: 5, say: "Friday nahi, Saturday chaar baje ke baad."}
+    after_outcome: ["Ho gaya na?"]
+    close: "Theek hai, thank you."
+  expected: {final_slot: "20261128-1600", writes: 1}
+
+- id: interrupt-time
+  category: interruption
+  language: hinglish
+  description: The caller interrupts the offer to correct the time, not the day.
+  caller:
+    opening: "Namaste, delivery ka slot badalna hai. Order 48291, pincode 380015."
+    facts:
+      ids: ["Order 48291, pincode 380015."]
+      wish: "Saturday shaam ko."
+    goals: [{date: 2026-11-28, after: "18:00"}]
+    triggers:
+      - {when: slot_offer, nth: 1, interrupt_at_word: 6, say: "Nahi nahi, 6 baje ke baad."}
+    close: "Bas, shukriya."
+  expected: {final_slot: "20261128-1800", writes: 1}
+
+- id: interrupt-en
+  category: interruption
+  language: english
+  description: An English caller interrupts an afternoon offer to ask for the evening.
+  caller:
+    opening: "Hello, I need to move my delivery. Order 48291, PIN 380015."
+    facts:
+      ids: ["Order 48291, PIN code 380015."]
+      wish: "Saturday afternoon."
+    goals: [{date: 2026-11-28, after: "18:00"}]
+    pick_style: english
+    triggers:
+      - {when: slot_offer, nth: 1, interrupt_at_word: 4, say: "Sorry, not the afternoon. Saturday after 6 pm."}
+    close: "Great, thanks."
+  expected: {final_slot: "20261128-1800", writes: 1}
