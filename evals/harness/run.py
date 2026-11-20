@@ -83,8 +83,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  gate                 {metrics['gate']}")
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
-        args.out.write_text(
-            json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        args.out.write_text(  # LF on every platform, as .gitattributes asks
+            json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n"
         )
         print(f"  wrote {args.out}")
 
