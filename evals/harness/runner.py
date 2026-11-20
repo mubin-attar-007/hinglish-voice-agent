@@ -34,6 +34,15 @@ def mock_factory(profile: str) -> LLMFactory:
     return make
 
 
+def gemini_factory(model: str) -> LLMFactory:
+    from voice_agent.llm.gemini import GeminiLLM
+
+    def make(scenario: Scenario, seed_: int) -> LLMProvider:
+        return GeminiLLM(model=model, seed=seed_)
+
+    return make
+
+
 @dataclass
 class TrialRecord:
     scenario: Scenario

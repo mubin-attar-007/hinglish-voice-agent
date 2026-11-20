@@ -17,15 +17,26 @@ from __future__ import annotations
 import argparse
 import io
 import json
+import os
 import sys
 from pathlib import Path
 
 from evals.graders.deterministic import grade
 from evals.harness.report import summarise, transcript
-from evals.harness.runner import mock_factory, run_corpus, run_trial
+from evals.harness.runner import LLMFactory, TrialRecord, gemini_factory, mock_factory, run_trial
 from evals.schema import load_corpus
+from voice_agent.llm.gemini import DEFAULT_MODEL
 from voice_agent.llm.mock import PROFILES
+from voice_agent.llm.pricing import PRICES
 from voice_agent.tools import SafetyConfig
+
+
+def _usd(records: list[TrialRecord], prices: dict[str, float]) -> float:
+    tokens_in = sum(step["input_tokens"] for r in records for step in r.log.steps)
+    tokens_out = sum(step["output_tokens"] for r in records for step in r.log.steps)
+    return tokens_in / 1e6 * prices.get("input_per_mtok_usd", 0.0) + tokens_out / 1e6 * prices.get(
+        "output_per_mtok_usd", 0.0
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -33,7 +44,14 @@ def main(argv: list[str] | None = None) -> int:
         sys.stdout.reconfigure(encoding="utf-8")  # Devanagari on a Windows console
     parser = argparse.ArgumentParser(prog="python -m evals.harness.run")
     parser.add_argument("--corpus", default="v0")
-    parser.add_argument("--llm", default="mock-reckless", choices=sorted(PROFILES))
+    parser.add_argument("--llm", default="mock-reckless", choices=[*sorted(PROFILES), "gemini"])
+    parser.add_argument("--model", default=DEFAULT_MODEL, help="the Gemini model id")
+    parser.add_argument(
+        "--max-usd",
+        type=float,
+        default=1.0,
+        help="real models only: stop before list-price cost passes this (default $1.00)",
+    )
     parser.add_argument("--safety", default="full", choices=["full", "baseline"])
     parser.add_argument("--faults", default="on", choices=["on", "scenario", "off"])
     parser.add_argument("--k", type=int, default=3, help="runs per scenario (seeds 0..k-1)")
@@ -54,7 +72,22 @@ def main(argv: list[str] | None = None) -> int:
 
     corpus = load_corpus(args.corpus)
     safety = SafetyConfig() if args.safety == "full" else SafetyConfig.baseline()
-    factory = mock_factory(args.llm)
+    prices: dict[str, float] = {}
+    factory: LLMFactory
+    if args.llm == "gemini":
+        if not os.environ.get("GEMINI_API_KEY"):
+            print("Set GEMINI_API_KEY (a dedicated key) to run against Gemini.", file=sys.stderr)
+            return 2
+        price = PRICES.get(args.model)
+        if price is None:
+            print(
+                f"No dated price for {args.model} in voice_agent/llm/pricing.py.", file=sys.stderr
+            )
+            return 2
+        prices = {k: v for k, v in price.items() if isinstance(v, float)}
+        factory = gemini_factory(args.model)
+    else:
+        factory = mock_factory(args.llm)
 
     if args.show:
         scenario = next(s for s in corpus.scenarios if s.id == args.show)
@@ -65,9 +98,25 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     seeds = list(range(args.k))
-    records = run_corpus(corpus.scenarios, factory, safety=safety, faults=args.faults, seeds=seeds)
+    records: list[TrialRecord] = []
+    stopped_early = False
+    for scenario in corpus.scenarios:
+        for seed_ in seeds:
+            if prices and _usd(records, prices) >= args.max_usd:
+                stopped_early = True
+                break
+            records.append(
+                run_trial(scenario, factory, safety=safety, faults=args.faults, seed_=seed_)
+            )
+        if stopped_early:
+            break
     grades = [grade(record) for record in records]
-    report = summarise(records, grades, corpus=corpus, k=args.k, seeds=seeds)
+    report = summarise(records, grades, corpus=corpus, k=args.k, seeds=seeds, prices=prices)
+    if stopped_early:
+        report["partial"] = (
+            f"stopped at the ${args.max_usd:.2f} cost cap after {len(records)} trials"
+        )
+        print(f"  PARTIAL: {report['partial']}")
     metrics = report["metrics"]
     print(
         f"{args.llm} · safety={safety.label} · faults={args.faults} · corpus {corpus.version} "
