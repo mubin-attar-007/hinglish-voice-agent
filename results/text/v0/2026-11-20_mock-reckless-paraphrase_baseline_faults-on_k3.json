@@ -1,0 +1,1903 @@
+{
+  "schema": "hinglish-voice-agent/results/v1",
+  "date": "2026-11-20",
+  "git_commit": "21015db",
+  "mode": "text",
+  "corpus": {
+    "version": "v0",
+    "sha256": "28cff54cf24be02e87ced594e2b8b2a7ba2e35309400659a3e0d63c674d1bf9d",
+    "scenarios": 20
+  },
+  "model": {
+    "name": "mock-reckless-paraphrase",
+    "note": "A mocked model: a rule-based test double, some profiles unreliable on purpose. These numbers describe the mock and the safety layers around it, not any real language model."
+  },
+  "safety": {
+    "label": "baseline",
+    "idempotency": false,
+    "cas": false,
+    "deadline": false,
+    "reread": false,
+    "preconditions": false,
+    "gate": false,
+    "outcome_by_code": false
+  },
+  "faults": "on",
+  "k": 3,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "trials": 60,
+  "metrics": {
+    "pass_at_1": {
+      "value": 0.05,
+      "ci95": [
+        0.0,
+        0.15
+      ],
+      "method": "share of trials that pass every check; 95% interval from a bootstrap over scenarios"
+    },
+    "pass_hat_k": {
+      "k": 3,
+      "value": 0.05,
+      "method": "mean over scenarios of C(passes, k) / C(runs, k)"
+    },
+    "duplicate_writes": {
+      "count": 30,
+      "trials_with_any": 30,
+      "trials": 60,
+      "rate_per_trial": 0.5,
+      "ci95": [
+        0.37734812427246284,
+        0.6226518757275372
+      ],
+      "method": "commits that re-apply a change already committed"
+    },
+    "unexpected_writes": {
+      "count": 52,
+      "trials_with_any": 51,
+      "trials": 60,
+      "rate_per_trial": 0.85,
+      "ci95": [
+        0.7388517410884038,
+        0.9190265075770431
+      ],
+      "method": "commits beyond the scenario's expected number of writes"
+    },
+    "false_confirmations": {
+      "count": 64,
+      "trials_with_any": 33,
+      "trials": 60,
+      "rate_per_trial": 0.55,
+      "ci95": [
+        0.42491714548981496,
+        0.6690654614623918
+      ],
+      "method": "heard statements that a change is done, or of a slot, that the record did not show when they were heard (or by the end of the call)"
+    },
+    "false_failures": {
+      "count": 41,
+      "trials_with_any": 37,
+      "trials": 60,
+      "rate_per_trial": 0.6166666666666667,
+      "ci95": [
+        0.4901736454040315,
+        0.7291191041511176
+      ],
+      "method": "heard statements that a change failed while the record showed it saved (or that a later write made false)"
+    },
+    "clarification": {
+      "required": 6,
+      "correct": 6,
+      "method": "a clarifying question was answered before the first write"
+    },
+    "harness_stuck": 0,
+    "unlabelled_claims": 0,
+    "checks_failed": {
+      "final_state": 20,
+      "no_duplicate_writes": 30,
+      "no_unexpected_writes": 51,
+      "no_false_confirmation": 33,
+      "no_false_failure": 37,
+      "outcome_communicated": 38,
+      "clarified_before_acting": 0,
+      "harness_ok": 0
+    },
+    "gate": {
+      "allow": 341,
+      "would_block": 232,
+      "outcome_by_code": 0,
+      "would_rewrite": 3
+    },
+    "by_category": {
+      "bad_input": 0.0,
+      "change_of_mind": 0.5,
+      "clarification": 0.0,
+      "code_mixed_time": 0.0,
+      "fault": 0.0,
+      "interruption": 0.0,
+      "plain": 0.0,
+      "unavailable": 0.0
+    }
+  },
+  "cost": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "usd": 0.0,
+    "prices": {}
+  },
+  "failures": [
+    {
+      "scenario": "bad-wrong-id",
+      "seed": 0,
+      "failed_checks": [
+        "final_state",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, order 48219, pincode 380015. Delivery Saturday shaam ko kar dijiye.",
+        "  [tool] lookup_order({'order_id': '48219', 'pincode': '380015'}) -> {'found': False, 'note': 'No order matches that order id and PIN code.'}",
+        "agent (model/no_claim): यह order नहीं मिला।",
+        "agent (model/no_claim): कृपया order number और PIN code फिर से बताइए।",
+        "caller: Sorry, galat bataya. Order 48291, pincode 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): आपकी delivery Saturday, 28 November, शाम 6 से 8 बजे के लिए set है।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "bad-wrong-id",
+      "seed": 1,
+      "failed_checks": [
+        "final_state",
+        "no_unexpected_writes",
+        "no_false_confirmation"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, order 48219, pincode 380015. Delivery Saturday shaam ko kar dijiye.",
+        "  [tool] lookup_order({'order_id': '48219', 'pincode': '380015'}) -> {'found': False, 'note': 'No order matches that order id and PIN code.'}",
+        "agent (model/no_claim): यह order नहीं मिला।",
+        "agent (model/no_claim): कृपया order number और PIN code फिर से बताइए।",
+        "caller: Sorry, galat bataya. Order 48291, pincode 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "agent (model/premature): हो गया!",
+        "agent (model/premature): आपकी delivery Saturday, 28 November, शाम 4 से 6 बजे कर दी है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "bad-wrong-id",
+      "seed": 2,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_confirmation",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, order 48219, pincode 380015. Delivery Saturday shaam ko kar dijiye.",
+        "  [tool] lookup_order({'order_id': '48219', 'pincode': '380015'}) -> {'found': False, 'note': 'No order matches that order id and PIN code.'}",
+        "agent (model/no_claim): यह order नहीं मिला।",
+        "agent (model/no_claim): कृपया order number और PIN code फिर से बताइए।",
+        "caller: Sorry, galat bataya. Order 48291, pincode 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 4 से 6 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/no_claim): बस, अब आपकी delivery Saturday को आ जाएगी।",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): आपकी delivery Saturday, 28 November, शाम 6 से 8 बजे के लिए set है।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "bad-off-task",
+      "seed": 0,
+      "failed_checks": [
+        "final_state",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello, mera refund kab aayega?",
+        "agent (model/no_claim): माफ़ कीजिए, मैं सिर्फ delivery का slot बदल सकती हूँ।",
+        "caller: Achha, toh delivery Saturday shaam ko kar dijiye.",
+        "agent (model/no_claim): नमस्ते!",
+        "agent (model/no_claim): अपना order number और delivery PIN code बताइए।",
+        "caller: Order 48291, pincode 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): आपकी delivery Saturday, 28 November, शाम 6 से 8 बजे के लिए set है।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "bad-off-task",
+      "seed": 1,
+      "failed_checks": [
+        "final_state",
+        "no_unexpected_writes",
+        "no_false_confirmation"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello, mera refund kab aayega?",
+        "agent (model/no_claim): माफ़ कीजिए, मैं सिर्फ delivery का slot बदल सकती हूँ।",
+        "caller: Achha, toh delivery Saturday shaam ko kar dijiye.",
+        "agent (model/no_claim): नमस्ते!",
+        "agent (model/no_claim): अपना order number और delivery PIN code बताइए।",
+        "caller: Order 48291, pincode 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "agent (model/premature): हो गया!",
+        "agent (model/premature): आपकी delivery Saturday, 28 November, शाम 4 से 6 बजे कर दी है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "bad-off-task",
+      "seed": 2,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_confirmation",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello, mera refund kab aayega?",
+        "agent (model/no_claim): माफ़ कीजिए, मैं सिर्फ delivery का slot बदल सकती हूँ।",
+        "caller: Achha, toh delivery Saturday shaam ko kar dijiye.",
+        "agent (model/no_claim): नमस्ते!",
+        "agent (model/no_claim): अपना order number और delivery PIN code बताइए।",
+        "caller: Order 48291, pincode 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 4 से 6 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/no_claim): बस, अब आपकी delivery Saturday को आ जाएगी।",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): आपकी delivery Saturday, 28 November, शाम 6 से 8 बजे के लिए set है।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "mind-two-changes",
+      "seed": 0,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_confirmation",
+        "no_false_failure"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, order 48291, pincode 380015. Saturday shaam ko kar dijiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Sorry, ek aur change. Sunday subah kar dijiye.",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "  [tool] list_slots({'date': '2026-11-29', 'after_time': '10:00', 'before_time': '12:00'}) -> {'date': '2026-11-29', 'slots': [{'slot_id': '20261129-1000', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '10:00-12:00', 'available': True}]}",
+        "agent (model/no_claim): Sunday, 29 November को सुबह 10 से 12 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 10 se 12 wala theek hai.",
+        "agent (model/no_claim): Your request went through.",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery Sunday, 29 November, सुबह 10 से 12 बजे कर दी है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261129-1000'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261129-1000', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '10:00-12:00', 'available': True}}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261129-1000'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261129-1000', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '10:00-12:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Sunday, 29 November, सुबह 10 से 12 बजे है।",
+        "caller: Bas, ab theek hai. Thank you.",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "mind-two-changes",
+      "seed": 1,
+      "failed_checks": [
+        "no_unexpected_writes",
+        "no_false_confirmation",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, order 48291, pincode 380015. Saturday shaam ko kar dijiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "agent (model/premature): हो गया!",
+        "agent (model/premature): आपकी delivery Saturday, 28 November, शाम 4 से 6 बजे कर दी है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Sorry, ek aur change. Sunday subah kar dijiye.",
+        "  [tool] list_slots({'date': '2026-11-29', 'after_time': '10:00', 'before_time': '12:00'}) -> {'date': '2026-11-29', 'slots': [{'slot_id': '20261129-1000', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '10:00-12:00', 'available': True}]}",
+        "agent (model/no_claim): Sunday, 29 November को सुबह 10 से 12 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 10 se 12 wala theek hai.",
+        "agent (model/no_claim): Your request went through.",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery Sunday, 29 November, सुबह 10 से 12 बजे कर दी है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261129-1000'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261129-1000', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '10:00-12:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Sunday, 29 November, सुबह 10 से 12 बजे है।",
+        "caller: Bas, ab theek hai. Thank you.",
+        "agent (model/no_claim): बस, अब आपकी delivery Saturday को आ जाएगी।",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "mind-two-changes",
+      "seed": 2,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, order 48291, pincode 380015. Saturday shaam ko kar dijiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 4 से 6 बजे है।",
+        "caller: Sorry, ek aur change. Sunday subah kar dijiye.",
+        "agent (model/no_claim): बस, अब आपकी delivery Saturday को आ जाएगी।",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "  [tool] list_slots({'date': '2026-11-29', 'after_time': '10:00', 'before_time': '12:00'}) -> {'date': '2026-11-29', 'slots': [{'slot_id': '20261129-1000', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '10:00-12:00', 'available': True}]}",
+        "agent (model/no_claim): Sunday, 29 November को सुबह 10 से 12 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 10 se 12 wala theek hai.",
+        "agent (model/no_claim): Your request went through.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261129-1000'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261129-1000', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '10:00-12:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Sunday, 29 November, सुबह 10 से 12 बजे है।",
+        "caller: Bas, ab theek hai. Thank you.",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "clarify-agle-saturday",
+      "seed": 0,
+      "failed_checks": [
+        "final_state",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, order 48291, pincode 380015. Delivery agle Saturday kar dijiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): कौनसा दिन चाहिए, 28 November या 5 December?",
+        "caller: Is wala, 28 tarikh. Shaam ko.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): आपकी delivery Saturday, 28 November, शाम 6 से 8 बजे के लिए set है।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "clarify-agle-saturday",
+      "seed": 1,
+      "failed_checks": [
+        "final_state",
+        "no_unexpected_writes",
+        "no_false_confirmation"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, order 48291, pincode 380015. Delivery agle Saturday kar dijiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): कौनसा दिन चाहिए, 28 November या 5 December?",
+        "caller: Is wala, 28 tarikh. Shaam ko.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "agent (model/premature): हो गया!",
+        "agent (model/premature): आपकी delivery Saturday, 28 November, शाम 4 से 6 बजे कर दी है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "clarify-agle-saturday",
+      "seed": 2,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_confirmation",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, order 48291, pincode 380015. Delivery agle Saturday kar dijiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): कौनसा दिन चाहिए, 28 November या 5 December?",
+        "caller: Is wala, 28 tarikh. Shaam ko.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 4 से 6 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/no_claim): बस, अब आपकी delivery Saturday को आ जाएगी।",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): आपकी delivery Saturday, 28 November, शाम 6 से 8 बजे के लिए set है।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "clarify-next-week",
+      "seed": 0,
+      "failed_checks": [
+        "final_state",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hi, order 48291, PIN 380015. Can you move it to sometime next week?",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): Which day next week would you like?",
+        "caller: Tuesday afternoon, please.",
+        "  [tool] list_slots({'date': '2026-12-01', 'after_time': '12:00', 'before_time': '16:00'}) -> {'date': '2026-12-01', 'slots': [{'slot_id': '20261201-1200', 'date': '2026-12-01', 'weekday': 'Tuesday', 'window': '12:00-14:00', 'available': True}, {'slot_id': '20261201-1400', 'date': '2026-12-01', 'weekday': 'Tuesday', 'window': '14:00-16:00', 'available': True}]}",
+        "agent (model/no_claim): On Tuesday, 1 December I have between 12 and 2 PM and between 2 and 4 PM.",
+        "agent (model/no_claim): Which one would you like?",
+        "caller: The 12 to 2 one, please.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261201-1200'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261201-1400'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261201-1400', 'date': '2026-12-01', 'weekday': 'Tuesday', 'window': '14:00-16:00', 'available': True}}",
+        "agent (model/not_fresh): Done!",
+        "agent (model/not_fresh): Your delivery is now on Tuesday, 1 December, between 2 and 4 PM.",
+        "caller: Thanks, bye.",
+        "agent (model/not_fresh): Sorry, there was an error and the change failed.",
+        "agent (model/not_fresh): Your delivery is on Tuesday, 1 December, between 2 and 4 PM.",
+        "agent (model/no_claim): Thank you, have a good day!"
+      ]
+    },
+    {
+      "scenario": "clarify-next-week",
+      "seed": 1,
+      "failed_checks": [
+        "final_state",
+        "no_unexpected_writes",
+        "no_false_confirmation"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hi, order 48291, PIN 380015. Can you move it to sometime next week?",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): Which day next week would you like?",
+        "caller: Tuesday afternoon, please.",
+        "  [tool] list_slots({'date': '2026-12-01', 'after_time': '12:00', 'before_time': '16:00'}) -> {'date': '2026-12-01', 'slots': [{'slot_id': '20261201-1200', 'date': '2026-12-01', 'weekday': 'Tuesday', 'window': '12:00-14:00', 'available': True}, {'slot_id': '20261201-1400', 'date': '2026-12-01', 'weekday': 'Tuesday', 'window': '14:00-16:00', 'available': True}]}",
+        "agent (model/no_claim): On Tuesday, 1 December I have between 12 and 2 PM and between 2 and 4 PM.",
+        "agent (model/no_claim): Which one would you like?",
+        "caller: The 12 to 2 one, please.",
+        "agent (model/premature): Done!",
+        "agent (model/premature): Your delivery has been moved to Tuesday, 1 December, between 12 and 2 PM.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261201-1200'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261201-1400'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261201-1400', 'date': '2026-12-01', 'weekday': 'Tuesday', 'window': '14:00-16:00', 'available': True}}",
+        "agent (model/not_fresh): Done!",
+        "agent (model/not_fresh): Your delivery is now on Tuesday, 1 December, between 2 and 4 PM.",
+        "caller: Thanks, bye.",
+        "agent (model/no_claim): Thank you, have a good day!"
+      ]
+    },
+    {
+      "scenario": "clarify-next-week",
+      "seed": 2,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_confirmation",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hi, order 48291, PIN 380015. Can you move it to sometime next week?",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): Which day next week would you like?",
+        "caller: Tuesday afternoon, please.",
+        "  [tool] list_slots({'date': '2026-12-01', 'after_time': '12:00', 'before_time': '16:00'}) -> {'date': '2026-12-01', 'slots': [{'slot_id': '20261201-1200', 'date': '2026-12-01', 'weekday': 'Tuesday', 'window': '12:00-14:00', 'available': True}, {'slot_id': '20261201-1400', 'date': '2026-12-01', 'weekday': 'Tuesday', 'window': '14:00-16:00', 'available': True}]}",
+        "agent (model/no_claim): On Tuesday, 1 December I have between 12 and 2 PM and between 2 and 4 PM.",
+        "agent (model/no_claim): Which one would you like?",
+        "caller: The 12 to 2 one, please.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261201-1200'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261201-1200'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261201-1200', 'date': '2026-12-01', 'weekday': 'Tuesday', 'window': '12:00-14:00', 'available': True}}",
+        "agent (model/not_fresh): Done!",
+        "agent (model/not_fresh): Your delivery is now on Tuesday, 1 December, between 12 and 2 PM.",
+        "caller: Thanks, bye.",
+        "agent (model/no_claim): Great news, it's locked in.",
+        "agent (model/not_fresh): Sorry, there was an error and the change failed.",
+        "agent (model/not_fresh): Your delivery is on Tuesday, 1 December, between 2 and 4 PM.",
+        "agent (model/no_claim): Thank you, have a good day!"
+      ]
+    },
+    {
+      "scenario": "time-parson",
+      "seed": 0,
+      "failed_checks": [
+        "final_state",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello ji, order 48291, pincode 380015. Delivery parson shaam ko chahiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): आपकी delivery Saturday, 28 November, शाम 6 से 8 बजे के लिए set है।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "time-parson",
+      "seed": 1,
+      "failed_checks": [
+        "final_state",
+        "no_unexpected_writes",
+        "no_false_confirmation"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello ji, order 48291, pincode 380015. Delivery parson shaam ko chahiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "agent (model/premature): हो गया!",
+        "agent (model/premature): आपकी delivery Saturday, 28 November, शाम 4 से 6 बजे कर दी है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "time-parson",
+      "seed": 2,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_confirmation",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello ji, order 48291, pincode 380015. Delivery parson shaam ko chahiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 4 से 6 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/no_claim): बस, अब आपकी delivery Saturday को आ जाएगी।",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): आपकी delivery Saturday, 28 November, शाम 6 से 8 बजे के लिए set है।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "time-agle-hafte",
+      "seed": 0,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste. Mera order 48291 hai aur pincode 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): आपको delivery किस दिन और किस time चाहिए?",
+        "caller: Agle hafte Monday subah kar dijiye.",
+        "  [tool] list_slots({'date': '2026-11-30', 'after_time': '10:00', 'before_time': '12:00'}) -> {'date': '2026-11-30', 'slots': [{'slot_id': '20261130-1000', 'date': '2026-11-30', 'weekday': 'Monday', 'window': '10:00-12:00', 'available': True}]}",
+        "agent (model/no_claim): Monday, 30 November को सुबह 10 से 12 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 10 se 12 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261130-1000'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261130-1000'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261130-1000', 'date': '2026-11-30', 'weekday': 'Monday', 'window': '10:00-12:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Monday, 30 November, सुबह 10 से 12 बजे है।",
+        "caller: Dhanyavaad.",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "time-agle-hafte",
+      "seed": 1,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_confirmation"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste. Mera order 48291 hai aur pincode 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): आपको delivery किस दिन और किस time चाहिए?",
+        "caller: Agle hafte Monday subah kar dijiye.",
+        "  [tool] list_slots({'date': '2026-11-30', 'after_time': '10:00', 'before_time': '12:00'}) -> {'date': '2026-11-30', 'slots': [{'slot_id': '20261130-1000', 'date': '2026-11-30', 'weekday': 'Monday', 'window': '10:00-12:00', 'available': True}]}",
+        "agent (model/no_claim): Monday, 30 November को सुबह 10 से 12 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 10 se 12 wala theek hai.",
+        "agent (model/premature): हो गया!",
+        "agent (model/premature): आपकी delivery Monday, 30 November, सुबह 10 से 12 बजे कर दी है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261130-1000'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261130-1000'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261130-1000', 'date': '2026-11-30', 'weekday': 'Monday', 'window': '10:00-12:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Monday, 30 November, सुबह 10 से 12 बजे है।",
+        "caller: Dhanyavaad.",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "time-agle-hafte",
+      "seed": 2,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste. Mera order 48291 hai aur pincode 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): आपको delivery किस दिन और किस time चाहिए?",
+        "caller: Agle hafte Monday subah kar dijiye.",
+        "  [tool] list_slots({'date': '2026-11-30', 'after_time': '10:00', 'before_time': '12:00'}) -> {'date': '2026-11-30', 'slots': [{'slot_id': '20261130-1000', 'date': '2026-11-30', 'weekday': 'Monday', 'window': '10:00-12:00', 'available': True}]}",
+        "agent (model/no_claim): Monday, 30 November को सुबह 10 से 12 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 10 se 12 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261130-1000'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261130-1000'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261130-1000', 'date': '2026-11-30', 'weekday': 'Monday', 'window': '10:00-12:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Monday, 30 November, सुबह 10 से 12 बजे है।",
+        "caller: Dhanyavaad.",
+        "agent (model/no_claim): बस, अब आपकी delivery Saturday को आ जाएगी।",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "time-saadhe",
+      "seed": 0,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hi, order 48291, pincode 380015. Saturday ko saadhe chaar ke baad ka slot chahiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:30'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 6 se 8 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, thanks.",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "time-saadhe",
+      "seed": 1,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_confirmation"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hi, order 48291, pincode 380015. Saturday ko saadhe chaar ke baad ka slot chahiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:30'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 6 se 8 wala theek hai.",
+        "agent (model/premature): हो गया!",
+        "agent (model/premature): आपकी delivery Saturday, 28 November, शाम 6 से 8 बजे कर दी है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, thanks.",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "time-saadhe",
+      "seed": 2,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hi, order 48291, pincode 380015. Saturday ko saadhe chaar ke baad ka slot chahiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:30'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 6 se 8 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, thanks.",
+        "agent (model/no_claim): बस, अब आपकी delivery Saturday को आ जाएगी।",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "fault-timeout-en",
+      "seed": 0,
+      "failed_checks": [
+        "final_state",
+        "no_unexpected_writes",
+        "no_false_confirmation",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hi, order 48291, PIN 380015. Please move my delivery to Saturday evening.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): On Saturday, 28 November I have between 4 and 6 PM and between 6 and 8 PM.",
+        "agent (model/no_claim): Which one would you like?",
+        "caller: The 4 to 6 one, please.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): Done!",
+        "agent (model/not_fresh): Your delivery is now on Saturday, 28 November, between 6 and 8 PM.",
+        "caller: Did it work?",
+        "agent (model/not_fresh): Sorry, there was an error and the change failed.",
+        "agent (model/not_fresh): Yes.",
+        "caller: Thanks, bye.",
+        "agent (model/no_claim): Your request went through.",
+        "agent (model/not_fresh): Sorry, there was an error and the change failed.",
+        "agent (model/not_fresh): Your delivery is on Saturday, 28 November, between 6 and 8 PM.",
+        "agent (model/no_claim): Thank you, have a good day!"
+      ]
+    },
+    {
+      "scenario": "fault-timeout-en",
+      "seed": 1,
+      "failed_checks": [
+        "final_state",
+        "no_unexpected_writes",
+        "no_false_confirmation",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hi, order 48291, PIN 380015. Please move my delivery to Saturday evening.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): On Saturday, 28 November I have between 4 and 6 PM and between 6 and 8 PM.",
+        "agent (model/no_claim): Which one would you like?",
+        "caller: The 4 to 6 one, please.",
+        "agent (model/premature): Done!",
+        "agent (model/premature): Your delivery has been moved to Saturday, 28 November, between 4 and 6 PM.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): Done!",
+        "agent (model/not_fresh): Your delivery is now on Saturday, 28 November, between 6 and 8 PM.",
+        "caller: Did it work?",
+        "agent (model/not_fresh): Yes.",
+        "caller: Thanks, bye.",
+        "agent (model/no_claim): Great news, it's locked in.",
+        "agent (model/no_claim): Thank you, have a good day!"
+      ]
+    },
+    {
+      "scenario": "fault-timeout-en",
+      "seed": 2,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_failure"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hi, order 48291, PIN 380015. Please move my delivery to Saturday evening.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): On Saturday, 28 November I have between 4 and 6 PM and between 6 and 8 PM.",
+        "agent (model/no_claim): Which one would you like?",
+        "caller: The 4 to 6 one, please.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}}",
+        "agent (model/not_fresh): Done!",
+        "agent (model/not_fresh): Your delivery is now on Saturday, 28 November, between 4 and 6 PM.",
+        "caller: Did it work?",
+        "agent (model/no_claim): Great news, it's locked in.",
+        "agent (model/not_fresh): Sorry, there was an error and the change failed.",
+        "agent (model/not_fresh): Yes.",
+        "caller: Thanks, bye.",
+        "agent (model/no_claim): Thank you, have a good day!"
+      ]
+    },
+    {
+      "scenario": "fault-error-hi",
+      "seed": 0,
+      "failed_checks": [
+        "final_state",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, order 48291, pincode 380015. Saturday shaam ko delivery kar dijiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'the order system failed: injected fault: the request failed before anything was written'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): आपकी delivery Saturday, 28 November, शाम 6 से 8 बजे के लिए set है।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "fault-error-hi",
+      "seed": 1,
+      "failed_checks": [
+        "final_state",
+        "no_false_confirmation"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, order 48291, pincode 380015. Saturday shaam ko delivery kar dijiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "agent (model/premature): हो गया!",
+        "agent (model/premature): आपकी delivery Saturday, 28 November, शाम 4 से 6 बजे कर दी है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'the order system failed: injected fault: the request failed before anything was written'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "fault-error-hi",
+      "seed": 2,
+      "failed_checks": [
+        "no_false_confirmation",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, order 48291, pincode 380015. Saturday shaam ko delivery kar dijiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'the order system failed: injected fault: the request failed before anything was written'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 4 से 6 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/no_claim): बस, अब आपकी delivery Saturday को आ जाएगी।",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): आपकी delivery Saturday, 28 November, शाम 6 से 8 बजे के लिए set है।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "fault-slow-late",
+      "seed": 0,
+      "failed_checks": [
+        "no_unexpected_writes",
+        "no_false_confirmation",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello, order 48291, pincode 380015. Saturday shaam ka slot chahiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Theek hai, shukriya.",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): आपकी delivery Saturday, 28 November, शाम 6 से 8 बजे के लिए set है।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "fault-slow-late",
+      "seed": 1,
+      "failed_checks": [
+        "no_unexpected_writes",
+        "no_false_confirmation",
+        "outcome_communicated"
+      ],
+      "notes": [
+        "the last outcome statement was made false by a later write"
+      ],
+      "transcript": [
+        "caller: Hello, order 48291, pincode 380015. Saturday shaam ka slot chahiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "agent (model/premature): हो गया!",
+        "agent (model/premature): आपकी delivery Saturday, 28 November, शाम 4 से 6 बजे कर दी है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Theek hai, shukriya.",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "fault-slow-late",
+      "seed": 2,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_confirmation",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello, order 48291, pincode 380015. Saturday shaam ka slot chahiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 4 से 6 बजे है।",
+        "caller: Theek hai, shukriya.",
+        "agent (model/no_claim): बस, अब आपकी delivery Saturday को आ जाएगी।",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): आपकी delivery Saturday, 28 November, शाम 6 से 8 बजे के लिए set है।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "interrupt-demo",
+      "seed": 0,
+      "failed_checks": [
+        "final_state",
+        "no_unexpected_writes",
+        "no_false_confirmation",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello, mera order 48291 hai, pincode 380015. Delivery Friday shaam ko kar dijiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-27', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-27', 'slots': [{'slot_id': '20261127-1600', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261127-1800', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Friday, 27 November को शाम [cut off]",
+        "agent (model/no_claim): (not heard)",
+        "caller: Friday nahi, Saturday chaar baje ke baad.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Ho gaya na?",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): हाँ जी।",
+        "caller: Theek hai, thank you.",
+        "agent (model/no_claim): Your request went through.",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): आपकी delivery Saturday, 28 November, शाम 6 से 8 बजे के लिए set है।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "interrupt-demo",
+      "seed": 1,
+      "failed_checks": [
+        "final_state",
+        "no_unexpected_writes",
+        "no_false_confirmation",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello, mera order 48291 hai, pincode 380015. Delivery Friday shaam ko kar dijiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-27', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-27', 'slots': [{'slot_id': '20261127-1600', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261127-1800', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Friday, 27 November को शाम [cut off]",
+        "agent (model/no_claim): (not heard)",
+        "caller: Friday nahi, Saturday chaar baje ke baad.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "agent (model/premature): हो गया!",
+        "agent (model/premature): आपकी delivery Saturday, 28 November, शाम 4 से 6 बजे कर दी है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Ho gaya na?",
+        "agent (model/not_fresh): हाँ जी।",
+        "caller: Theek hai, thank you.",
+        "agent (model/no_claim): बस, अब आपकी delivery Saturday को आ जाएगी।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "interrupt-demo",
+      "seed": 2,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_failure"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello, mera order 48291 hai, pincode 380015. Delivery Friday shaam ko kar dijiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-27', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-27', 'slots': [{'slot_id': '20261127-1600', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261127-1800', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Friday, 27 November को शाम [cut off]",
+        "agent (model/no_claim): (not heard)",
+        "caller: Friday nahi, Saturday chaar baje ke baad.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 4 से 6 बजे है।",
+        "caller: Ho gaya na?",
+        "agent (model/no_claim): बस, अब आपकी delivery Saturday को आ जाएगी।",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): हाँ जी।",
+        "caller: Theek hai, thank you.",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "interrupt-time",
+      "seed": 0,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, delivery ka slot badalna hai. Order 48291, pincode 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): आपको delivery किस दिन और किस time चाहिए?",
+        "caller: Saturday shaam ko.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 [cut off]",
+        "agent (model/no_claim): (not heard)",
+        "caller: Nahi nahi, 6 baje ke baad.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '18:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 6 se 8 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, shukriya.",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "interrupt-time",
+      "seed": 1,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_confirmation"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, delivery ka slot badalna hai. Order 48291, pincode 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): आपको delivery किस दिन और किस time चाहिए?",
+        "caller: Saturday shaam ko.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 [cut off]",
+        "agent (model/no_claim): (not heard)",
+        "caller: Nahi nahi, 6 baje ke baad.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '18:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 6 se 8 wala theek hai.",
+        "agent (model/premature): हो गया!",
+        "agent (model/premature): आपकी delivery Saturday, 28 November, शाम 6 से 8 बजे कर दी है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, shukriya.",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "interrupt-time",
+      "seed": 2,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, delivery ka slot badalna hai. Order 48291, pincode 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): आपको delivery किस दिन और किस time चाहिए?",
+        "caller: Saturday shaam ko.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 [cut off]",
+        "agent (model/no_claim): (not heard)",
+        "caller: Nahi nahi, 6 baje ke baad.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '18:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 6 se 8 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, shukriya.",
+        "agent (model/no_claim): बस, अब आपकी delivery Saturday को आ जाएगी।",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "interrupt-en",
+      "seed": 0,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello, I need to move my delivery. Order 48291, PIN 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): Which day and time would you like the delivery?",
+        "caller: Saturday afternoon.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '12:00', 'before_time': '16:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1200', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '12:00-14:00', 'available': True}, {'slot_id': '20261128-1400', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '14:00-16:00', 'available': True}]}",
+        "agent (model/no_claim): On Saturday, 28 November [cut off]",
+        "agent (model/no_claim): (not heard)",
+        "caller: Sorry, not the afternoon. Saturday after 6 pm.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '18:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): On Saturday, 28 November I have between 6 and 8 PM.",
+        "agent (model/no_claim): Which one would you like?",
+        "caller: The 6 to 8 one, please.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): Done!",
+        "agent (model/not_fresh): Your delivery is now on Saturday, 28 November, between 6 and 8 PM.",
+        "caller: Great, thanks.",
+        "agent (model/not_fresh): Sorry, there was an error and the change failed.",
+        "agent (model/no_claim): Thank you, have a good day!"
+      ]
+    },
+    {
+      "scenario": "interrupt-en",
+      "seed": 1,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_confirmation"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello, I need to move my delivery. Order 48291, PIN 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): Which day and time would you like the delivery?",
+        "caller: Saturday afternoon.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '12:00', 'before_time': '16:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1200', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '12:00-14:00', 'available': True}, {'slot_id': '20261128-1400', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '14:00-16:00', 'available': True}]}",
+        "agent (model/no_claim): On Saturday, 28 November [cut off]",
+        "agent (model/no_claim): (not heard)",
+        "caller: Sorry, not the afternoon. Saturday after 6 pm.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '18:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): On Saturday, 28 November I have between 6 and 8 PM.",
+        "agent (model/no_claim): Which one would you like?",
+        "caller: The 6 to 8 one, please.",
+        "agent (model/premature): Done!",
+        "agent (model/premature): Your delivery has been moved to Saturday, 28 November, between 6 and 8 PM.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): Done!",
+        "agent (model/not_fresh): Your delivery is now on Saturday, 28 November, between 6 and 8 PM.",
+        "caller: Great, thanks.",
+        "agent (model/no_claim): Thank you, have a good day!"
+      ]
+    },
+    {
+      "scenario": "interrupt-en",
+      "seed": 2,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello, I need to move my delivery. Order 48291, PIN 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): Which day and time would you like the delivery?",
+        "caller: Saturday afternoon.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '12:00', 'before_time': '16:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1200', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '12:00-14:00', 'available': True}, {'slot_id': '20261128-1400', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '14:00-16:00', 'available': True}]}",
+        "agent (model/no_claim): On Saturday, 28 November [cut off]",
+        "agent (model/no_claim): (not heard)",
+        "caller: Sorry, not the afternoon. Saturday after 6 pm.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '18:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): On Saturday, 28 November I have between 6 and 8 PM.",
+        "agent (model/no_claim): Which one would you like?",
+        "caller: The 6 to 8 one, please.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): Done!",
+        "agent (model/not_fresh): Your delivery is now on Saturday, 28 November, between 6 and 8 PM.",
+        "caller: Great, thanks.",
+        "agent (model/no_claim): Great news, it's locked in.",
+        "agent (model/not_fresh): Sorry, there was an error and the change failed.",
+        "agent (model/no_claim): Thank you, have a good day!"
+      ]
+    },
+    {
+      "scenario": "plain-hi-roman",
+      "seed": 0,
+      "failed_checks": [
+        "final_state",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, mujhe apni delivery ka time badalna hai.",
+        "agent (model/no_claim): नमस्ते!",
+        "agent (model/no_claim): अपना order number और delivery PIN code बताइए।",
+        "caller: Order number 48291, pincode 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): आपको delivery किस दिन और किस time चाहिए?",
+        "caller: Saturday shaam ko kar dijiye.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): आपकी delivery Saturday, 28 November, शाम 6 से 8 बजे के लिए set है।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "plain-hi-roman",
+      "seed": 1,
+      "failed_checks": [
+        "final_state",
+        "no_unexpected_writes",
+        "no_false_confirmation"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, mujhe apni delivery ka time badalna hai.",
+        "agent (model/no_claim): नमस्ते!",
+        "agent (model/no_claim): अपना order number और delivery PIN code बताइए।",
+        "caller: Order number 48291, pincode 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): आपको delivery किस दिन और किस time चाहिए?",
+        "caller: Saturday shaam ko kar dijiye.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "agent (model/premature): हो गया!",
+        "agent (model/premature): आपकी delivery Saturday, 28 November, शाम 4 से 6 बजे कर दी है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "plain-hi-roman",
+      "seed": 2,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_confirmation",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, mujhe apni delivery ka time badalna hai.",
+        "agent (model/no_claim): नमस्ते!",
+        "agent (model/no_claim): अपना order number और delivery PIN code बताइए।",
+        "caller: Order number 48291, pincode 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): आपको delivery किस दिन और किस time चाहिए?",
+        "caller: Saturday shaam ko kar dijiye.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 4 से 6 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/no_claim): बस, अब आपकी delivery Saturday को आ जाएगी।",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): आपकी delivery Saturday, 28 November, शाम 6 से 8 बजे के लिए set है।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "plain-en",
+      "seed": 0,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hi, I'd like to change my delivery time.",
+        "agent (model/no_claim): Hello!",
+        "agent (model/no_claim): Please tell me your order number and delivery PIN code.",
+        "caller: My order number is 48291 and the PIN code is 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): Which day and time would you like the delivery?",
+        "caller: Sunday morning, please.",
+        "  [tool] list_slots({'date': '2026-11-29', 'after_time': '10:00', 'before_time': '12:00'}) -> {'date': '2026-11-29', 'slots': [{'slot_id': '20261129-1000', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '10:00-12:00', 'available': True}]}",
+        "agent (model/no_claim): On Sunday, 29 November I have between 10 AM and 12 PM.",
+        "agent (model/no_claim): Which one would you like?",
+        "caller: The 10 to 12 one, please.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261129-1000'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261129-1000'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261129-1000', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '10:00-12:00', 'available': True}}",
+        "agent (model/not_fresh): Done!",
+        "agent (model/not_fresh): Your delivery is now on Sunday, 29 November, between 10 AM and 12 PM.",
+        "caller: That's all, thank you.",
+        "agent (model/not_fresh): Sorry, there was an error and the change failed.",
+        "agent (model/no_claim): Thank you, have a good day!"
+      ]
+    },
+    {
+      "scenario": "plain-en",
+      "seed": 1,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_confirmation"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hi, I'd like to change my delivery time.",
+        "agent (model/no_claim): Hello!",
+        "agent (model/no_claim): Please tell me your order number and delivery PIN code.",
+        "caller: My order number is 48291 and the PIN code is 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): Which day and time would you like the delivery?",
+        "caller: Sunday morning, please.",
+        "  [tool] list_slots({'date': '2026-11-29', 'after_time': '10:00', 'before_time': '12:00'}) -> {'date': '2026-11-29', 'slots': [{'slot_id': '20261129-1000', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '10:00-12:00', 'available': True}]}",
+        "agent (model/no_claim): On Sunday, 29 November I have between 10 AM and 12 PM.",
+        "agent (model/no_claim): Which one would you like?",
+        "caller: The 10 to 12 one, please.",
+        "agent (model/premature): Done!",
+        "agent (model/premature): Your delivery has been moved to Sunday, 29 November, between 10 AM and 12 PM.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261129-1000'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261129-1000'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261129-1000', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '10:00-12:00', 'available': True}}",
+        "agent (model/not_fresh): Done!",
+        "agent (model/not_fresh): Your delivery is now on Sunday, 29 November, between 10 AM and 12 PM.",
+        "caller: That's all, thank you.",
+        "agent (model/no_claim): Thank you, have a good day!"
+      ]
+    },
+    {
+      "scenario": "plain-en",
+      "seed": 2,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hi, I'd like to change my delivery time.",
+        "agent (model/no_claim): Hello!",
+        "agent (model/no_claim): Please tell me your order number and delivery PIN code.",
+        "caller: My order number is 48291 and the PIN code is 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): Which day and time would you like the delivery?",
+        "caller: Sunday morning, please.",
+        "  [tool] list_slots({'date': '2026-11-29', 'after_time': '10:00', 'before_time': '12:00'}) -> {'date': '2026-11-29', 'slots': [{'slot_id': '20261129-1000', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '10:00-12:00', 'available': True}]}",
+        "agent (model/no_claim): On Sunday, 29 November I have between 10 AM and 12 PM.",
+        "agent (model/no_claim): Which one would you like?",
+        "caller: The 10 to 12 one, please.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261129-1000'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261129-1000'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261129-1000', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '10:00-12:00', 'available': True}}",
+        "agent (model/not_fresh): Done!",
+        "agent (model/not_fresh): Your delivery is now on Sunday, 29 November, between 10 AM and 12 PM.",
+        "caller: That's all, thank you.",
+        "agent (model/no_claim): Great news, it's locked in.",
+        "agent (model/not_fresh): Sorry, there was an error and the change failed.",
+        "agent (model/no_claim): Thank you, have a good day!"
+      ]
+    },
+    {
+      "scenario": "plain-devanagari",
+      "seed": 0,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: नमस्ते, मुझे अपनी delivery का time बदलना है।",
+        "agent (model/no_claim): नमस्ते!",
+        "agent (model/no_claim): अपना order number और delivery PIN code बताइए।",
+        "caller: ऑर्डर 48291, पिनकोड 380015।",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): आपको delivery किस दिन और किस time चाहिए?",
+        "caller: शनिवार शाम 4 से 6 बजे कर दीजिए।",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '18:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 से 6 वाला ठीक है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 4 से 6 बजे है।",
+        "caller: बस, धन्यवाद।",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "plain-devanagari",
+      "seed": 1,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_confirmation"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: नमस्ते, मुझे अपनी delivery का time बदलना है।",
+        "agent (model/no_claim): नमस्ते!",
+        "agent (model/no_claim): अपना order number और delivery PIN code बताइए।",
+        "caller: ऑर्डर 48291, पिनकोड 380015।",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): आपको delivery किस दिन और किस time चाहिए?",
+        "caller: शनिवार शाम 4 से 6 बजे कर दीजिए।",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '18:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 से 6 वाला ठीक है।",
+        "agent (model/premature): हो गया!",
+        "agent (model/premature): आपकी delivery Saturday, 28 November, शाम 4 से 6 बजे कर दी है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 4 से 6 बजे है।",
+        "caller: बस, धन्यवाद।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "plain-devanagari",
+      "seed": 2,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: नमस्ते, मुझे अपनी delivery का time बदलना है।",
+        "agent (model/no_claim): नमस्ते!",
+        "agent (model/no_claim): अपना order number और delivery PIN code बताइए।",
+        "caller: ऑर्डर 48291, पिनकोड 380015।",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): आपको delivery किस दिन और किस time चाहिए?",
+        "caller: शनिवार शाम 4 से 6 बजे कर दीजिए।",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '18:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 से 6 वाला ठीक है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 4 से 6 बजे है।",
+        "caller: बस, धन्यवाद।",
+        "agent (model/no_claim): बस, अब आपकी delivery Saturday को आ जाएगी।",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "unavailable-full",
+      "seed": 0,
+      "failed_checks": [
+        "final_state",
+        "no_unexpected_writes",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, order 48291, pincode 380015. Saturday shaam ka slot chahiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': False}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': False}]}",
+        "agent (model/no_claim): उस time पर कोई slot available नहीं है।",
+        "  [tool] list_slots({'date': '2026-11-29', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-29', 'slots': [{'slot_id': '20261129-1600', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261129-1800', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Sunday, 29 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261129-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261129-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261129-1800', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Sunday, 29 November, शाम 6 से 8 बजे है।",
+        "caller: Theek hai, thank you.",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): आपकी delivery Sunday, 29 November, शाम 6 से 8 बजे के लिए set है।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "unavailable-full",
+      "seed": 1,
+      "failed_checks": [
+        "final_state",
+        "no_unexpected_writes",
+        "no_false_confirmation"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, order 48291, pincode 380015. Saturday shaam ka slot chahiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': False}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': False}]}",
+        "agent (model/no_claim): उस time पर कोई slot available नहीं है।",
+        "  [tool] list_slots({'date': '2026-11-29', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-29', 'slots': [{'slot_id': '20261129-1600', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261129-1800', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Sunday, 29 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "agent (model/premature): हो गया!",
+        "agent (model/premature): आपकी delivery Sunday, 29 November, शाम 4 से 6 बजे कर दी है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261129-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261129-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261129-1800', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Sunday, 29 November, शाम 6 से 8 बजे है।",
+        "caller: Theek hai, thank you.",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "unavailable-full",
+      "seed": 2,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes",
+        "no_false_confirmation",
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, order 48291, pincode 380015. Saturday shaam ka slot chahiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': False}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': False}]}",
+        "agent (model/no_claim): उस time पर कोई slot available नहीं है।",
+        "  [tool] list_slots({'date': '2026-11-29', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-29', 'slots': [{'slot_id': '20261129-1600', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261129-1800', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Sunday, 29 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261129-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261129-1600'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261129-1600', 'date': '2026-11-29', 'weekday': 'Sunday', 'window': '16:00-18:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Sunday, 29 November, शाम 4 से 6 बजे है।",
+        "caller: Theek hai, thank you.",
+        "agent (model/no_claim): बस, अब आपकी delivery Saturday को आ जाएगी।",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): आपकी delivery Sunday, 29 November, शाम 6 से 8 बजे के लिए set है।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "unavailable-taken",
+      "seed": 0,
+      "failed_checks": [
+        "no_false_failure",
+        "outcome_communicated"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello, order 48291, pincode 380015. Delivery Saturday shaam ko chahiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'slot_full', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "agent (model/not_fresh): आपकी delivery Saturday, 28 November, शाम 6 से 8 बजे के लिए set है।",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "unavailable-taken",
+      "seed": 1,
+      "failed_checks": [
+        "no_false_confirmation"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello, order 48291, pincode 380015. Delivery Saturday shaam ko chahiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "agent (model/premature): हो गया!",
+        "agent (model/premature): आपकी delivery Saturday, 28 November, शाम 4 से 6 बजे कर दी है।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'slot_full', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "unavailable-taken",
+      "seed": 2,
+      "failed_checks": [
+        "no_false_confirmation"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello, order 48291, pincode 380015. Delivery Saturday shaam ko chahiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'slot_full', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}",
+        "agent (model/no_claim): माफ़ कीजिए, वह slot भर गया है।",
+        "caller: Achha, toh 6 baje wala kar dijiye.",
+        "agent (model/no_claim): बस, अब आपकी delivery Saturday को आ जाएगी।",
+        "agent (model/not_fresh): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे है।",
+        "caller: Bas, thank you.",
+        "agent (model/no_claim): Your request went through.",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    }
+  ]
+}

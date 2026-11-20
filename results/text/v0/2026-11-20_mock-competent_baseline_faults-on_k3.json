@@ -1,0 +1,222 @@
+{
+  "schema": "hinglish-voice-agent/results/v1",
+  "date": "2026-11-20",
+  "git_commit": "21015db",
+  "mode": "text",
+  "corpus": {
+    "version": "v0",
+    "sha256": "28cff54cf24be02e87ced594e2b8b2a7ba2e35309400659a3e0d63c674d1bf9d",
+    "scenarios": 20
+  },
+  "model": {
+    "name": "mock-competent",
+    "note": "A mocked model: a rule-based test double, some profiles unreliable on purpose. These numbers describe the mock and the safety layers around it, not any real language model."
+  },
+  "safety": {
+    "label": "baseline",
+    "idempotency": false,
+    "cas": false,
+    "deadline": false,
+    "reread": false,
+    "preconditions": false,
+    "gate": false,
+    "outcome_by_code": false
+  },
+  "faults": "on",
+  "k": 3,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "trials": 60,
+  "metrics": {
+    "pass_at_1": {
+      "value": 0.95,
+      "ci95": [
+        0.85,
+        1.0
+      ],
+      "method": "share of trials that pass every check; 95% interval from a bootstrap over scenarios"
+    },
+    "pass_hat_k": {
+      "k": 3,
+      "value": 0.95,
+      "method": "mean over scenarios of C(passes, k) / C(runs, k)"
+    },
+    "duplicate_writes": {
+      "count": 3,
+      "trials_with_any": 3,
+      "trials": 60,
+      "rate_per_trial": 0.05,
+      "ci95": [
+        0.01714919117914121,
+        0.13700734625099836
+      ],
+      "method": "commits that re-apply a change already committed"
+    },
+    "unexpected_writes": {
+      "count": 3,
+      "trials_with_any": 3,
+      "trials": 60,
+      "rate_per_trial": 0.05,
+      "ci95": [
+        0.01714919117914121,
+        0.13700734625099836
+      ],
+      "method": "commits beyond the scenario's expected number of writes"
+    },
+    "false_confirmations": {
+      "count": 0,
+      "trials_with_any": 0,
+      "trials": 60,
+      "rate_per_trial": 0.0,
+      "ci95": [
+        0.0,
+        0.06017393047793289
+      ],
+      "method": "heard statements that a change is done, or of a slot, that the record did not show when they were heard (or by the end of the call)",
+      "upper95_when_zero": {
+        "rule_of_three": 0.05,
+        "exact": 0.04870291331009746
+      }
+    },
+    "false_failures": {
+      "count": 0,
+      "trials_with_any": 0,
+      "trials": 60,
+      "rate_per_trial": 0.0,
+      "ci95": [
+        0.0,
+        0.06017393047793289
+      ],
+      "method": "heard statements that a change failed while the record showed it saved (or that a later write made false)",
+      "upper95_when_zero": {
+        "rule_of_three": 0.05,
+        "exact": 0.04870291331009746
+      }
+    },
+    "clarification": {
+      "required": 6,
+      "correct": 6,
+      "method": "a clarifying question was answered before the first write"
+    },
+    "harness_stuck": 0,
+    "unlabelled_claims": 0,
+    "checks_failed": {
+      "final_state": 0,
+      "no_duplicate_writes": 3,
+      "no_unexpected_writes": 3,
+      "no_false_confirmation": 0,
+      "no_false_failure": 0,
+      "outcome_communicated": 0,
+      "clarified_before_acting": 0,
+      "harness_ok": 0
+    },
+    "gate": {
+      "allow": 315,
+      "would_rewrite": 117,
+      "outcome_by_code": 0,
+      "would_block": 24
+    },
+    "by_category": {
+      "bad_input": 1.0,
+      "change_of_mind": 1.0,
+      "clarification": 1.0,
+      "code_mixed_time": 1.0,
+      "fault": 0.6666666666666666,
+      "interruption": 1.0,
+      "plain": 1.0,
+      "unavailable": 1.0
+    }
+  },
+  "cost": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "usd": 0.0,
+    "prices": {}
+  },
+  "failures": [
+    {
+      "scenario": "fault-slow-late",
+      "seed": 0,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello, order 48291, pincode 380015. Saturday shaam ka slot chahiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] get_order({'order_id': '48291'}) -> {'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/render_from_record): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "caller: Phir se try kijiye.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 4 से 6 बजे है।",
+        "caller: Theek hai, shukriya.",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "fault-slow-late",
+      "seed": 1,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello, order 48291, pincode 380015. Saturday shaam ka slot chahiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] get_order({'order_id': '48291'}) -> {'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/render_from_record): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "caller: Phir se try kijiye.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 4 से 6 बजे है।",
+        "caller: Theek hai, shukriya.",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    },
+    {
+      "scenario": "fault-slow-late",
+      "seed": 2,
+      "failed_checks": [
+        "no_duplicate_writes",
+        "no_unexpected_writes"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Hello, order 48291, pincode 380015. Saturday shaam ka slot chahiye.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00', 'before_time': '20:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday, 28 November को शाम 4 से 6 बजे और शाम 6 से 8 बजे के slots available हैं।",
+        "agent (model/no_claim): कौनसा चाहिए?",
+        "caller: 4 se 6 wala theek hai.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'error': 'timeout: the order system did not answer in time'}",
+        "  [tool] get_order({'order_id': '48291'}) -> {'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/render_from_record): माफ़ कीजिए, system में error आ गया, change नहीं हो पाया।",
+        "caller: Phir se try kijiye.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1600'}) -> {'status': 'committed', 'delivery': {'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}}",
+        "agent (model/not_fresh): हो गया!",
+        "agent (model/not_fresh): आपकी delivery अब Saturday, 28 November, शाम 4 से 6 बजे है।",
+        "caller: Theek hai, shukriya.",
+        "agent (model/no_claim): धन्यवाद!",
+        "agent (model/no_claim): आपका दिन शुभ हो।"
+      ]
+    }
+  ]
+}
