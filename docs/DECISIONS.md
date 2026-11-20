@@ -108,3 +108,7 @@ These could not be confirmed. Each one is checked before the work that depends o
   - It also gave times in 24-hour form ("16:00 se 18:00").
   - Candidates are a firmer prompt, or a Pipecat text transform that renders times and script before TTS. M2 chooses between them by measuring.
 - **Booking on an unclear reply:** in r2, the model booked the first of two offered slots when the caller's reply named neither. The prompt should require an explicit choice. To be fixed and re-measured in M2.
+- **A choice made by a time limit:** the grader counts a choice only when the caller names the slot.
+  - In r3, "6 baje ke baad" fitted exactly one offered slot, and the agent booked it. The grader failed the call. It is published as measured.
+  - Before the next real-model run, the grader will count a limit that fits exactly one offered slot as a choice.
+  - M2 decides whether the agent should confirm before booking.

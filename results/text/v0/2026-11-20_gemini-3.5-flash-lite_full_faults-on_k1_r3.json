@@ -1,0 +1,185 @@
+{
+  "schema": "hinglish-voice-agent/results/v1",
+  "date": "2026-11-20",
+  "git_commit": "b9eb4fc",
+  "mode": "text",
+  "corpus": {
+    "version": "v0",
+    "sha256": "0ff676161a9221e2820112f5272a53caba9ead608b63d5cf7bfafa104cbce5c4",
+    "scenarios": 20
+  },
+  "model": {
+    "name": "gemini-3.5-flash-lite",
+    "note": "",
+    "thinking": "low",
+    "min_interval_s": 5.0
+  },
+  "safety": {
+    "label": "full",
+    "idempotency": true,
+    "cas": true,
+    "deadline": true,
+    "reread": true,
+    "preconditions": true,
+    "gate": true,
+    "outcome_by_code": true
+  },
+  "faults": "on",
+  "k": 1,
+  "seeds": [
+    0
+  ],
+  "trials": 20,
+  "planned_trials": 20,
+  "complete": true,
+  "stopped": null,
+  "errored_trials": [],
+  "metrics": {
+    "pass_at_1": {
+      "value": 0.95,
+      "ci95": [
+        0.85,
+        1.0
+      ],
+      "method": "share of trials that pass every check; 95% interval from a bootstrap over scenarios"
+    },
+    "pass_hat_k": {
+      "k": 1,
+      "value": 0.95,
+      "scenarios": 20,
+      "method": "mean over scenarios with all k runs of C(passes, k) / C(runs, k)"
+    },
+    "duplicate_writes": {
+      "count": 0,
+      "trials_with_any": 0,
+      "trials": 20,
+      "rate_per_trial": 0.0,
+      "ci95": [
+        0.0,
+        0.16113012549493322
+      ],
+      "method": "commits that re-apply a change already committed",
+      "upper95_when_zero": {
+        "rule_of_three": 0.15,
+        "exact": 0.13910834066826516
+      }
+    },
+    "unexpected_writes": {
+      "count": 0,
+      "trials_with_any": 0,
+      "trials": 20,
+      "rate_per_trial": 0.0,
+      "ci95": [
+        0.0,
+        0.16113012549493322
+      ],
+      "method": "commits beyond the scenario's expected number of writes",
+      "upper95_when_zero": {
+        "rule_of_three": 0.15,
+        "exact": 0.13910834066826516
+      }
+    },
+    "false_confirmations": {
+      "count": 0,
+      "trials_with_any": 0,
+      "trials": 20,
+      "rate_per_trial": 0.0,
+      "ci95": [
+        0.0,
+        0.16113012549493322
+      ],
+      "method": "heard statements that a change is done, or of a slot, that the record did not show when they were heard (or by the end of the call)",
+      "upper95_when_zero": {
+        "rule_of_three": 0.15,
+        "exact": 0.13910834066826516
+      }
+    },
+    "false_failures": {
+      "count": 0,
+      "trials_with_any": 0,
+      "trials": 20,
+      "rate_per_trial": 0.0,
+      "ci95": [
+        0.0,
+        0.16113012549493322
+      ],
+      "method": "heard statements that a change failed while the record showed it saved (or that a later write made false)",
+      "upper95_when_zero": {
+        "rule_of_three": 0.15,
+        "exact": 0.13910834066826516
+      }
+    },
+    "clarification": {
+      "required": 2,
+      "correct": 2,
+      "method": "a clarifying question was answered before the first write"
+    },
+    "harness_stuck": 0,
+    "unlabelled_claims": 1,
+    "checks_failed": {
+      "final_state": 1,
+      "no_duplicate_writes": 0,
+      "no_unexpected_writes": 0,
+      "no_false_confirmation": 0,
+      "no_false_failure": 0,
+      "outcome_communicated": 0,
+      "clarified_before_acting": 0,
+      "harness_ok": 0
+    },
+    "gate": {
+      "allow": 119,
+      "outcome_by_code": 23,
+      "silenced_claims": 0,
+      "rewrite": 8
+    },
+    "by_category": {
+      "bad_input": 1.0,
+      "change_of_mind": 1.0,
+      "clarification": 1.0,
+      "code_mixed_time": 1.0,
+      "fault": 1.0,
+      "interruption": 0.6666666666666666,
+      "plain": 1.0,
+      "unavailable": 1.0
+    }
+  },
+  "cost": {
+    "input_tokens": 151644,
+    "output_tokens": 5775,
+    "thinking_tokens": 1093,
+    "usd": 0.0599,
+    "price": {
+      "input_per_mtok_usd": 0.3,
+      "output_per_mtok_usd": 2.5,
+      "checked": "2026-11-20",
+      "source": "https://aistudio.google.com/docs/pricing"
+    },
+    "method": "tokens at the dated list price (paid tier); a free-tier key is not charged"
+  },
+  "failures": [
+    {
+      "scenario": "interrupt-time",
+      "seed": 0,
+      "failed_checks": [
+        "final_state"
+      ],
+      "notes": [],
+      "transcript": [
+        "caller: Namaste, delivery ka slot badalna hai. Order 48291, pincode 380015.",
+        "  [tool] lookup_order({'order_id': '48291', 'pincode': '380015'}) -> {'found': True, 'order': {'order_id': '48291', 'item': 'study table', 'delivery': {'slot_id': '20261127-1400', 'date': '2026-11-27', 'weekday': 'Friday', 'window': '14:00-16:00', 'available': True}}}",
+        "agent (model/no_claim): Namaste!",
+        "agent (model/no_claim): Aapko order 48291 ka delivery slot kis din aur kitne baje change karwana hai?",
+        "caller: Saturday shaam ko.",
+        "  [tool] list_slots({'date': '2026-11-28', 'after_time': '16:00'}) -> {'date': '2026-11-28', 'slots': [{'slot_id': '20261128-1600', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '16:00-18:00', 'available': True}, {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}]}",
+        "agent (model/no_claim): Saturday shaam ko 16:00 se 18:00 [cut off]",
+        "agent (model/no_claim): (not heard)",
+        "caller: Nahi nahi, 6 baje ke baad.",
+        "  [tool] reschedule({'order_id': '48291', 'slot_id': '20261128-1800'}) -> {'status': 'saved', 'verified_from_order_system': True, 'delivery': {'slot_id': '20261128-1800', 'date': '2026-11-28', 'weekday': 'Saturday', 'window': '18:00-20:00', 'available': True}, 'say_this': 'हो गया। आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे के बीच होगी।'}",
+        "agent (template/outcome_by_code): हो गया। आपकी delivery अब Saturday, 28 November, शाम 6 से 8 बजे के बीच होगी।",
+        "caller: Bas, shukriya.",
+        "agent (model/no_claim): Shukriya!",
+        "agent (model/no_claim): Agar aur koi madad chahiye ho toh zaroor batayiyega, aapka din shubh ho."
+      ]
+    }
+  ]
+}

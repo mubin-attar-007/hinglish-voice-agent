@@ -1,7 +1,7 @@
 {
   "schema": "hinglish-voice-agent/results/v1",
   "date": "2026-11-20",
-  "git_commit": "8bdd16f",
+  "git_commit": "b9eb4fc",
   "mode": "text",
   "corpus": {
     "version": "v0",
@@ -101,7 +101,7 @@
     "harness_stuck": 0,
     "unlabelled_claims": 0,
     "checks_failed": {
-      "final_state": 0,
+      "final_state": 22,
       "no_duplicate_writes": 13,
       "no_unexpected_writes": 35,
       "no_false_confirmation": 40,
@@ -141,6 +141,7 @@
       "scenario": "bad-wrong-id",
       "seed": 0,
       "failed_checks": [
+        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -206,6 +207,7 @@
       "scenario": "bad-wrong-id",
       "seed": 2,
       "failed_checks": [
+        "final_state",
         "no_unexpected_writes",
         "no_false_failure",
         "outcome_communicated"
@@ -235,6 +237,7 @@
       "scenario": "bad-off-task",
       "seed": 0,
       "failed_checks": [
+        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -304,6 +307,7 @@
       "scenario": "bad-off-task",
       "seed": 2,
       "failed_checks": [
+        "final_state",
         "no_unexpected_writes",
         "no_false_failure",
         "outcome_communicated"
@@ -447,6 +451,7 @@
       "scenario": "clarify-agle-saturday",
       "seed": 0,
       "failed_checks": [
+        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -510,6 +515,7 @@
       "scenario": "clarify-agle-saturday",
       "seed": 2,
       "failed_checks": [
+        "final_state",
         "no_unexpected_writes",
         "no_false_failure",
         "outcome_communicated"
@@ -538,6 +544,7 @@
       "scenario": "clarify-next-week",
       "seed": 0,
       "failed_checks": [
+        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -599,6 +606,7 @@
       "scenario": "clarify-next-week",
       "seed": 2,
       "failed_checks": [
+        "final_state",
         "no_unexpected_writes",
         "no_false_failure",
         "outcome_communicated"
@@ -626,6 +634,7 @@
       "scenario": "time-parson",
       "seed": 0,
       "failed_checks": [
+        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -685,6 +694,7 @@
       "scenario": "time-parson",
       "seed": 2,
       "failed_checks": [
+        "final_state",
         "no_unexpected_writes",
         "no_false_failure",
         "outcome_communicated"
@@ -887,6 +897,7 @@
       "scenario": "fault-timeout-en",
       "seed": 0,
       "failed_checks": [
+        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -945,6 +956,7 @@
       "scenario": "fault-timeout-en",
       "seed": 2,
       "failed_checks": [
+        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -973,6 +985,7 @@
       "scenario": "fault-error-hi",
       "seed": 0,
       "failed_checks": [
+        "final_state",
         "no_false_confirmation",
         "no_false_failure",
         "outcome_communicated"
@@ -1034,6 +1047,7 @@
       "scenario": "fault-error-hi",
       "seed": 2,
       "failed_checks": [
+        "final_state",
         "no_false_failure",
         "outcome_communicated"
       ],
@@ -1148,6 +1162,7 @@
       "scenario": "interrupt-demo",
       "seed": 0,
       "failed_checks": [
+        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -1216,6 +1231,7 @@
       "scenario": "interrupt-demo",
       "seed": 2,
       "failed_checks": [
+        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -1452,6 +1468,7 @@
       "scenario": "plain-hi-roman",
       "seed": 0,
       "failed_checks": [
+        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -1521,6 +1538,7 @@
       "scenario": "plain-hi-roman",
       "seed": 2,
       "failed_checks": [
+        "final_state",
         "no_unexpected_writes",
         "no_false_failure",
         "outcome_communicated"
@@ -1749,6 +1767,7 @@
       "scenario": "unavailable-full",
       "seed": 0,
       "failed_checks": [
+        "final_state",
         "no_unexpected_writes",
         "no_false_confirmation",
         "no_false_failure",
@@ -1812,6 +1831,7 @@
       "scenario": "unavailable-full",
       "seed": 2,
       "failed_checks": [
+        "final_state",
         "no_unexpected_writes",
         "no_false_failure",
         "outcome_communicated"
@@ -1840,6 +1860,7 @@
       "scenario": "unavailable-taken",
       "seed": 0,
       "failed_checks": [
+        "final_state",
         "no_false_confirmation",
         "no_false_failure",
         "outcome_communicated"
@@ -1898,6 +1919,7 @@
       "scenario": "unavailable-taken",
       "seed": 2,
       "failed_checks": [
+        "final_state",
         "no_false_failure",
         "outcome_communicated"
       ],
