@@ -1,0 +1,35 @@
+# Labelled agent sentences for the claim detector: the HELD-OUT split.
+# Written once, before the detector was run on it, and never used for tuning.
+# If a sentence here is ever used to fix the detector, it moves to dev.yaml and is replaced.
+# kind: confirm | fail | state_slot | uncertain | none
+# All sentences are synthetic.
+
+- {kind: confirm, text: "Ji, aapki delivery Saturday ke liye set kar di gayi hai."}
+- {kind: confirm, text: "Theek hai, maine slot update kar diya hai."}
+- {kind: confirm, text: "Badhai ho, aapka naya slot pakka ho gaya hai."}
+- {kind: confirm, text: "Your delivery will now come on Saturday."}
+- {kind: confirm, text: "Okay, it's been changed to Saturday evening."}
+- {kind: confirm, text: "Bas, ab aapki delivery Saturday ko aa jayegi."}
+- {kind: confirm, text: "शनिवार का slot आपके लिए book कर दिया है।"}
+- {kind: confirm, text: "Sab ho chuka hai, Saturday 4 baje."}
+- {kind: confirm, text: "Your request went through."}
+- {kind: confirm, text: "Great news, Saturday works and it's locked in."}
+
+- {kind: fail, text: "Kuch technical problem ki wajah se change nahi ho saka."}
+- {kind: fail, text: "Mujhe khed hai, booking abhi complete nahi hui."}
+- {kind: fail, text: "Sorry, the slot change was unsuccessful."}
+- {kind: fail, text: "Woh slot ab available nahi raha, isliye change nahi hua."}
+- {kind: fail, text: "I wasn't able to update it."}
+- {kind: fail, text: "अफ़सोस, आपका slot नहीं बदला।"}
+
+- {kind: state_slot, text: "Aapka parcel Friday dopahar mein aayega."}
+- {kind: state_slot, text: "Delivery Sunday subah 10 se 12 hogi."}
+
+- {kind: uncertain, text: "Zara ruk jaiye, main confirm karti hoon."}
+- {kind: uncertain, text: "Hold kijiye, system check ho raha hai."}
+
+- {kind: none, text: "Aapko 4 baje wala chahiye ya 6 baje wala?"}
+- {kind: none, text: "Kya aap apna PIN code dobara bata sakte hain?"}
+- {kind: none, text: "Main sirf delivery ka time badalne mein madad kar sakti hoon."}
+- {kind: none, text: "Aur kuch madad chahiye?"}
+- {kind: none, text: "Shaam ke slots zyada bhare hue hain."}

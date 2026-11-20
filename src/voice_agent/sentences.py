@@ -1,0 +1,77 @@
+"""Split streamed model text into sentences, so the gate can check each one before TTS.
+
+A sentence ends at '.', '?', '!' or '।' followed by a space, or at a newline. Not inside a
+number ("4.30") or after a known abbreviation ("p.m."). The same splitter runs on text mode's
+streamed deltas and, in M2, inside the voice pipeline.
+"""
+
+from __future__ import annotations
+
+_ENDINGS = ".?!।"
+_ABBREVIATIONS = {
+    "a.m",
+    "p.m",
+    "am",
+    "pm",
+    "dr",
+    "mr",
+    "mrs",
+    "ms",
+    "no",
+    "rs",
+    "approx",
+    "etc",
+    "vs",
+}
+
+
+class SentenceSplitter:
+    def __init__(self) -> None:
+        self._buffer = ""
+
+    def feed(self, chunk: str) -> list[str]:
+        """Add streamed text; return the sentences it completed."""
+        self._buffer += chunk
+        sentences: list[str] = []
+        start = 0
+        i = 0
+        text = self._buffer
+        while i < len(text):
+            char = text[i]
+            if char == "\n" or char == "।":
+                end = i + 1
+            elif char in _ENDINGS:
+                j = i
+                while j + 1 < len(text) and text[j + 1] in _ENDINGS:
+                    j += 1
+                if j + 1 >= len(text):
+                    break  # wait: more text may follow ("4." could become "4.30")
+                if not text[j + 1].isspace() or (char == "." and self._abbreviation(text, i)):
+                    i = j + 1
+                    continue
+                end = j + 1
+            else:
+                i += 1
+                continue
+            sentence = text[start:end].strip()
+            if sentence:
+                sentences.append(sentence)
+            start = end
+            i = end
+        self._buffer = text[start:]
+        return sentences
+
+    def flush(self) -> list[str]:
+        """The rest of the text, at the end of the model's response."""
+        rest, self._buffer = self._buffer.strip(), ""
+        return [rest] if rest else []
+
+    @staticmethod
+    def _abbreviation(text: str, dot: int) -> bool:
+        word_start = max(text.rfind(" ", 0, dot), text.rfind("\n", 0, dot)) + 1
+        return text[word_start:dot].lower() in _ABBREVIATIONS
+
+
+def split_sentences(text: str) -> list[str]:
+    splitter = SentenceSplitter()
+    return splitter.feed(text) + splitter.flush()
