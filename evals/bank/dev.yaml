@@ -1,0 +1,64 @@
+# Labelled agent sentences for the claim detector: the DEV split.
+# The detector is tuned on this split only, and must classify all of it correctly.
+# kind: confirm | fail | state_slot | uncertain | none
+# All sentences are synthetic.
+
+- {kind: confirm, text: "Ho gaya! Aapki delivery ab Saturday ko hai."}
+- {kind: confirm, text: "हो गया! आपकी delivery अब Saturday को है।"}
+- {kind: confirm, text: "Aapki delivery shift kar di gayi hai."}
+- {kind: confirm, text: "Maine aapki delivery Saturday 4 se 6 baje kar di hai."}
+- {kind: confirm, text: "Your delivery has been rescheduled to Saturday."}
+- {kind: confirm, text: "Done, your delivery is moved to Saturday between 4 and 6 PM."}
+- {kind: confirm, text: "All set, Saturday it is."}
+- {kind: confirm, text: "Booking confirm ho gayi hai."}
+- {kind: confirm, text: "Maine change kar diya hai."}
+- {kind: confirm, text: "Aapka slot book ho gaya hai."}
+- {kind: confirm, text: "I've moved your delivery to Saturday evening."}
+- {kind: confirm, text: "Your new slot is confirmed."}
+- {kind: confirm, text: "Change successfully save ho gaya."}
+- {kind: confirm, text: "मैंने आपकी delivery बदल दी है।"}
+- {kind: confirm, text: "Pakka, Saturday shaam 4 se 6."}
+
+- {kind: fail, text: "Sorry, change nahi ho paya."}
+- {kind: fail, text: "System mein error aa gaya, booking fail ho gayi."}
+- {kind: fail, text: "Maaf kijiye, ye slot book nahi ho paya."}
+- {kind: fail, text: "Your change didn't go through."}
+- {kind: fail, text: "I'm sorry, the booking failed."}
+- {kind: fail, text: "Abhi tak change nahi hua hai."}
+- {kind: fail, text: "Aapki delivery abhi bhi Friday ko hai."}
+- {kind: fail, text: "Unfortunately I couldn't move your delivery."}
+- {kind: fail, text: "माफ़ कीजिए, बदलाव नहीं हो पाया।"}
+- {kind: fail, text: "The change was not saved."}
+
+- {kind: state_slot, text: "Aapki delivery abhi Friday dopahar 2 se 4 baje hai."}
+- {kind: state_slot, text: "Your delivery is on Friday between 2 and 4 PM."}
+- {kind: state_slot, text: "Aapka order Saturday shaam ko aayega."}
+- {kind: state_slot, text: "आपकी delivery शनिवार शाम 4 से 6 बजे होगी।"}
+
+- {kind: uncertain, text: "Ek second, main check kar rahi hoon."}
+- {kind: uncertain, text: "One moment, let me check the order system."}
+- {kind: uncertain, text: "Main abhi system mein dekh rahi hoon."}
+- {kind: uncertain, text: "एक second, मैं check कर रही हूँ।"}
+
+- {kind: none, text: "Saturday ko shaam 4 se 6 aur 6 se 8 available hai."}
+- {kind: none, text: "Kaunsa slot chahiye?"}
+- {kind: none, text: "Kya main ise Saturday 4 se 6 kar doon?"}
+- {kind: none, text: "Namaste! Main aapki kya madad kar sakti hoon?"}
+- {kind: none, text: "Apna order number aur pincode bataiye."}
+- {kind: none, text: "Would you like the 4 to 6 slot or the 6 to 8 slot?"}
+- {kind: none, text: "Theek hai."}
+- {kind: none, text: "Dhanyavaad, aapka din shubh ho."}
+- {kind: none, text: "Kya aap Saturday chahte hain ya Sunday?"}
+- {kind: none, text: "Please share your order id and PIN code."}
+
+# Added after code review of PR #3: questions that use outcome words, statements with offer
+# words, and replies to "is it done?".
+- {kind: none, text: "Would you like it rescheduled to Saturday, 4 to 6 PM?"}
+- {kind: none, text: "Kya main ise Saturday ke liye book kar doon?"}
+- {kind: none, text: "Shall I confirm the 4 to 6 slot for you?"}
+- {kind: none, text: "Aapki delivery Saturday 4 se 6 ho sakti hai."}
+- {kind: state_slot, text: "Aapki delivery Saturday 4 baje hogi, jo sabse pehla available slot hai."}
+- {kind: state_slot, text: "Your delivery is on Saturday between 4 and 6 PM, which is the earliest option."}
+- {kind: confirm, text: "Haan ji.", caller_last: "Ho gaya kya?"}
+- {kind: confirm, text: "Haan ji, Saturday shaam ko.", caller_last: "Saturday pe shift ho gaya na?"}
+- {kind: none, text: "Haan ji.", caller_last: "Kya aap meri baat sun rahe ho?"}
