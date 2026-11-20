@@ -26,3 +26,12 @@ def test_gemini_without_a_key_sends_nothing(monkeypatch: pytest.MonkeyPatch) -> 
 
 def test_a_complete_mock_run_passes_the_guarantee_check() -> None:
     assert main(["--llm", "mock-reckless", "--k", "1", "--require-guarantee"]) == 0
+
+
+def test_pacing_is_for_real_models_only_and_never_negative() -> None:
+    with pytest.raises(SystemExit) as exit_info:
+        main(["--llm", "mock-reckless", "--min-interval-s", "5"])
+    assert exit_info.value.code == 2
+    with pytest.raises(SystemExit) as exit_info:
+        main(["--llm", "gemini", "--min-interval-s", "-3"])
+    assert exit_info.value.code == 2

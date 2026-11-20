@@ -17,7 +17,7 @@
       - {when: slot_offer, nth: 1, interrupt_at_word: 5, say: "Friday nahi, Saturday chaar baje ke baad."}
     after_outcome: ["Ho gaya na?"]
     close: "Theek hai, thank you."
-  expected: {final_slot: "20261128-1600", writes: 1}
+  expected: {final_slot: "20261128-1600", writes: 1, final_fits: {date: 2026-11-28, after: "16:00"}}
 
 - id: interrupt-time
   category: interruption

@@ -14,7 +14,7 @@
     pick_style: english
     after_outcome: ["Did it work?"]
     close: "Thanks, bye."
-  expected: {final_slot: "20261128-1600", writes: 1}
+  expected: {final_slot: "20261128-1600", writes: 1, final_fits: {date: 2026-11-28, after: "16:00"}}
 
 - id: fault-error-hi
   category: fault
@@ -30,7 +30,7 @@
     goals: [{date: 2026-11-28, after: "16:00"}]
     after_not_saved: ["Phir se try kijiye."]
     close: "Bas, thank you."
-  expected: {final_slot: "20261128-1600", writes: 1}
+  expected: {final_slot: "20261128-1600", writes: 1, final_fits: {date: 2026-11-28, after: "16:00"}}
 
 - id: fault-slow-late
   category: fault
@@ -47,4 +47,4 @@
     goals: [{date: 2026-11-28, after: "16:00"}]
     after_not_saved: ["Phir se try kijiye."]
     close: "Theek hai, shukriya."
-  expected: {final_slot: "20261128-1600", writes: 1}
+  expected: {final_slot: "20261128-1600", writes: 1, final_fits: {date: 2026-11-28, after: "16:00"}}

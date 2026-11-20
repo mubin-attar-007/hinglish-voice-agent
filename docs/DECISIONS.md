@@ -27,6 +27,8 @@ This file holds the project's technical decisions, and the versions and prices t
 | 2026-11-20 | After a write, code speaks the outcome, and a model response that makes a change says nothing of its own | The held-out sentence bank shows the detector misses 28% of paraphrased claims, and a mock exploited that before its retry landed. This keeps the moment of a change independent of detection. See [METHOD.md](METHOD.md#false-confirmations) |
 | 2026-11-20 | Mock models label every sentence with what it really claims, and graders use those labels as ground truth | A claim the detector misses still counts against the agent, so mock results can't flatter the detector |
 | 2026-11-20 | "Faults on" adds a timeout after commit to the first reschedule of every scenario that has no reschedule fault of its own | Most writes in a faults-on run then lose their answer, which is the hardest case for the guarantee |
+| 2026-11-20 | Gemini thinking level defaults to `low` (`--thinking`), with a 60 s server deadline | The first real requests at default thinking ran past the SDK's 30 s deadline, which it sends as `X-Server-Timeout`. A phone call can't wait for long thinking |
+| 2026-11-20 | The M1 real-model run uses `gemini-3.5-flash-lite` | `gemini-3.8-flash` answered "503 UNAVAILABLE: high demand" that day. 3.8 Flash joins the M2 model comparison |
 
 ## Verified facts
 
@@ -67,6 +69,8 @@ This file holds the project's technical decisions, and the versions and prices t
 | On the free tier, content may be used to improve Google's products, and human reviewers may read it. On paid tiers, prompts are not used to improve products | [Terms](https://aistudio.google.com/docs/terms) (effective 2026-03-23) | 2026-11-20 |
 | The speech-to-speech baseline candidate is `gemini-3.8-live`, which supports function calling. Audio costs $3.00 in and $12.00 out per 1M tokens, about $0.005 and $0.018 a minute | [Pricing](https://aistudio.google.com/docs/pricing) | 2026-11-20 |
 | `google-genai` 3.6.1 was released on 2026-11-18. Manual function calling uses `types.FunctionDeclaration(parameters_json_schema=…)` | [PyPI](https://pypi.org/project/google-genai/) · [README](https://github.com/googleapis/python-genai) | 2026-11-20 |
+| In `google-genai` 3.6.1, `HttpOptions.timeout` (ms) is sent as the server deadline (`X-Server-Timeout`). Function responses go back with role `user` in the SDK's own chat loop, although its README example shows `tool`. `ThinkingConfig.thinking_level` takes MINIMAL, LOW, MEDIUM, HIGH or XHIGH | SDK source: `_api_client.py`, `chats.py` and `types.py` | 2026-11-20 |
+| A one-word probe with thinking `low`, once per model, from this project's network, on 2026-11-20. `gemini-3.8-flash` returned 503 UNAVAILABLE ("high demand"). `gemini-3.5-flash-lite` answered in 6.0 s, and `gemini-3.1-flash-lite` in 2.4 s. These are single samples on a busy day, not latency measurements | Probe script, run once per model | 2026-11-20 |
 
 ### Hosting
 
@@ -99,3 +103,12 @@ These could not be confirmed. Each one is checked before the work that depends o
 - **Whether Fly.io can still create Machines in `bom`:** run `fly platform regions` before the host decision in M3.
 - **Hindi support in Gemini's Live (speech-to-speech) models** is unverified.
 - **Whether Pipecat's JS client resamples playback audio** is unverified. Until it is, the server's output sample rate is matched to the client player's rate.
+- **How to make spoken replies TTS-friendly** is an open question for M2.
+  - In M1's real-model runs, `gemini-3.5-flash-lite` wrote Hindi in Roman script, although the prompt asked for Devanagari.
+  - It also gave times in 24-hour form ("16:00 se 18:00").
+  - Candidates are a firmer prompt, or a Pipecat text transform that renders times and script before TTS. M2 chooses between them by measuring.
+- **Booking on an unclear reply:** in r2, the model booked the first of two offered slots when the caller's reply named neither. The prompt should require an explicit choice. To be fixed and re-measured in M2.
+- **A choice made by a time limit:** the grader counts a choice only when the caller names the slot.
+  - In r3, "6 baje ke baad" fitted exactly one offered slot, and the agent booked it. The grader failed the call. It is published as measured.
+  - Before the next real-model run, the grader will count a limit that fits exactly one offered slot as a choice.
+  - M2 decides whether the agent should confirm before booking.

@@ -12,7 +12,7 @@
       clarify: "Is wala, 28 tarikh. Shaam ko."
     goals: [{date: 2026-11-28, after: "16:00"}]
     close: "Bas, thank you."
-  expected: {final_slot: "20261128-1600", writes: 1, clarify_before_write: true}
+  expected: {final_slot: "20261128-1600", writes: 1, clarify_before_write: true, final_fits: {date: 2026-11-28, after: "16:00"}}
 
 - id: clarify-next-week
   category: clarification
@@ -27,4 +27,4 @@
     goals: [{date: 2026-12-01, after: "12:00"}]
     pick_style: english
     close: "Thanks, bye."
-  expected: {final_slot: "20261201-1200", writes: 1, clarify_before_write: true}
+  expected: {final_slot: "20261201-1200", writes: 1, clarify_before_write: true, final_fits: {date: 2026-12-01, after: "12:00", before: "16:00"}}

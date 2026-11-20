@@ -23,12 +23,12 @@ MOCK_NOTE = (
 
 
 def _git_commit() -> str:
-    """The code's commit, marked "-dirty" if tracked files outside results/ differ from it."""
+    """The code's commit, marked "-dirty" if the code or the corpus differ from it (not docs)."""
     try:
         out = subprocess.run(
             ["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, check=True
         )
-        diff = ["git", "diff", "--quiet", "HEAD", "--", ".", ":(exclude)results"]
+        diff = ["git", "diff", "--quiet", "HEAD", "--", "src", "evals", "pyproject.toml", "uv.lock"]
         dirty = subprocess.run(diff, check=False).returncode != 0
     except (OSError, subprocess.CalledProcessError):
         return "unknown"

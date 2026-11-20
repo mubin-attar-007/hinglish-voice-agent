@@ -23,15 +23,25 @@ from typing import Any
 from evals.schema import CallerScript, Goal, Trigger
 from voice_agent.calllog import Spoken
 from voice_agent.gate.claims import ClaimKind, classify
-from voice_agent.timeparse import NUMBER_WORDS, normalise
+from voice_agent.timeparse import NUMBER_WORDS, normalise, parse_when
 
 _ASKS_IDS = re.compile(r"order (?:number|id|nambar)|pin ?code|पिन|order नंबर", re.IGNORECASE)
 _NOT_FOUND = re.compile(r"नहीं मिला|nahi mila|couldn't find|could not find", re.IGNORECASE)
-_ASKS_WHEN = re.compile(r"किस दिन|kis din|which day|what day|what time|kab chahiye", re.IGNORECASE)
+_ASKS_WHEN = re.compile(
+    r"\bwhen\b[^.?!]*\?|\b(?:which|what) (?:day|date|time)\b|\bkis (?:din|date|time|samay)\b|"
+    r"\bkab\b[^.?!।]*\?|किस (?:दिन|date|time|समय)|कब[^.?!।]*\?",
+    re.IGNORECASE,
+)
 _CLARIFY = re.compile(r"\b(?:ya|or)\b|\sया\s|which day next week|अगले हफ्ते किस दिन", re.IGNORECASE)
 _OFF_TASK_REPLY = re.compile(r"सिर्फ delivery|sirf delivery|only change delivery", re.IGNORECASE)
 _NO_CHANGE = re.compile(r"कोई change नहीं|koi change nahi|haven't changed", re.IGNORECASE)
 _GOODBYE = re.compile(r"धन्यवाद|शुभ हो|have a good day|thank you", re.IGNORECASE)
+# The agent wrapping up: the caller says goodbye rather than asking for more.
+_ANYTHING_ELSE = re.compile(
+    r"\banything else\b|\b(?:kuch aur|aur kuch|koi aur|aur koi) (?:madad|help|sawal)\b|"
+    r"\b(?:aur kuch|kuch aur)\s*\?|कुछ और मदद|और कुछ मदद",
+    re.IGNORECASE,
+)
 
 
 @dataclass(frozen=True)
@@ -84,11 +94,13 @@ class ScriptedCaller:
         self._armed: tuple[int, Trigger] | None = None
         self._offers = 0
         self._offered: list[dict[str, Any]] = []
+        self._last_offered: list[dict[str, Any]] = []  # the most recent slots offered
         self._confirmed = 0
         self._told: set[tuple[ClaimKind, str | None]] = set()  # outcomes already heard
         self._repeated = False  # this turn repeated an outcome heard before
         self._unmatched = 0
         self._closed = False
+        self._rejected = False  # turned down an offer: the fallback day is now the wish
 
     def opening(self) -> str:
         self._note("opening", 0)
@@ -106,6 +118,7 @@ class ScriptedCaller:
         ]
         if not self._offered:
             return None
+        self._last_offered = self._offered
         self._offers += 1
         for i, trigger in enumerate(self.script.triggers):
             if i not in self._fired and self._offers == trigger.nth:
@@ -149,6 +162,14 @@ class ScriptedCaller:
             return self._reply(answer, "asked:ids", seq)
         if _OFF_TASK_REPLY.search(text):
             return self._reply(self.script.facts.wish, "after_off_task", seq)
+        # A proposed other day comes first: it often reads like a clarifying question
+        # ("Kya aap Sunday ya kisi aur din ka dekhna chahenge?").
+        fallback = self.script.fallback_goal
+        fallback_wish = self.script.facts.fallback_wish
+        if fallback and fallback_wish and self._rejected and "?" in text and not self._offered:
+            spec = parse_when(text, self.now)
+            if spec.day == fallback.date or fallback.date in spec.alternatives:
+                return self._reply(fallback_wish, "accepted_other_day", seq)
         if "?" in text and _CLARIFY.search(text) and not self._offered:
             return self._reply(
                 self.script.facts.clarify or self.script.facts.wish, "asked:clarify", seq
@@ -159,9 +180,11 @@ class ScriptedCaller:
                 return self._reply(
                     pick_phrase(choice, self.script.pick_style), f"picked:{choice['slot_id']}", seq
                 )
+            self._rejected = True
             return self._reply(self.script.facts.reject, "rejected_offer", seq)
         if _ASKS_WHEN.search(text):
-            return self._reply(self.script.facts.wish, "asked:when", seq)
+            wish = fallback_wish if self._rejected and fallback_wish else self.script.facts.wish
+            return self._reply(wish, "asked:when", seq)
         if self._repeated:  # the agent answered "did it work?" with the outcome again
             if self._after_outcome:
                 return self._reply(self._after_outcome.pop(0), "after_outcome", seq)
@@ -172,9 +195,10 @@ class ScriptedCaller:
         )
         if (
             outcome is ClaimKind.FAIL
-            or states_slot
+            or states_slot  # questions about when, offers and clarifications came first
             or _NO_CHANGE.search(text)
             or _GOODBYE.search(text)
+            or _ANYTHING_ELSE.search(text)
         ):
             return self._close(seq)
 
@@ -183,7 +207,10 @@ class ScriptedCaller:
             self.stuck = True
             self._note("harness_stuck", seq)
             return CallerAction(None, ended=True)
-        return self._reply(self.script.facts.repeat or self.script.facts.wish, "unmatched", seq)
+        facts = self.script.facts
+        if self._rejected and facts.fallback_wish:  # "kuch aur din dekhna chahenge?" and the like
+            return self._reply(facts.fallback_wish, "unmatched", seq)
+        return self._reply(facts.repeat or facts.wish, "unmatched", seq)
 
     # ---- helpers -----------------------------------------------------------------------------
 
@@ -219,7 +246,20 @@ class ScriptedCaller:
     def _reply(self, line: str, why: str, seq: int) -> CallerAction:
         self._unmatched = 0
         self._note(why, seq, line)
+        if why in ("after_not_saved", "after_outcome"):  # e.g. "toh 6 baje wala kar dijiye"
+            named = self._slot_named(line)
+            if named is not None:
+                self._note(f"picked:{named['slot_id']}", seq)
         return CallerAction(line)
+
+    def _slot_named(self, line: str) -> dict[str, Any] | None:
+        """A slot from the last offer that a scripted line names by its time, if any."""
+        spec = parse_when(line, self.now)
+        for slot in self._last_offered:
+            start, end = (time.fromisoformat(part) for part in slot["window"].split("-"))
+            if spec.at == start or (spec.after == start and spec.before in (None, end)):
+                return slot
+        return None
 
     def _close(self, seq: int) -> CallerAction:
         self._closed = True

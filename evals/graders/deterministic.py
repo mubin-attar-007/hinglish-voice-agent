@@ -11,9 +11,11 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass, field
+from datetime import date, time
 
 from evals.harness.runner import TrialRecord
-from orders.db import slot_id_for
+from evals.schema import Goal
+from orders.db import DEFAULT_WINDOWS, slot_id_for
 from voice_agent.calllog import Meaning
 from voice_agent.gate.claims import ClaimKind, classify
 from voice_agent.timeparse import parse_when
@@ -117,7 +119,7 @@ def grade(record: TrialRecord) -> Grade:
         clarified = bool(asked) and (first_write is None or asked[0] < first_write)
 
     checks = {
-        "final_state": record.final_slot == scenario.expected_final_slot,
+        "final_state": _final_ok(record),
         "no_duplicate_writes": duplicates == 0,
         "no_unexpected_writes": unexpected == 0,
         "no_false_confirmation": false_confirmations == 0,
@@ -142,6 +144,40 @@ def grade(record: TrialRecord) -> Grade:
         harness_stuck=record.stuck,
         gate=_gate_counts(record),
         notes=notes,
+    )
+
+
+def _final_ok(record: TrialRecord) -> bool:
+    """No change expected: unchanged. A change: a slot in the goal, and the one the caller chose."""
+    scenario, final = record.scenario, record.final_slot
+    if scenario.expected.final_slot == "unchanged":
+        return final == record.original_slot
+    picked = [
+        e["what"][len("picked:") :] for e in record.caller_log if e["what"].startswith("picked:")
+    ]
+    windows = scenario.world.spec().windows
+    in_goal = final == scenario.expected_final_slot or _fits(
+        final, scenario.expected.final_fits, record.original_slot, windows
+    )
+    return in_goal and bool(picked) and final == picked[-1]
+
+
+def _fits(
+    slot_id: str | None,
+    goal: Goal | None,
+    original: str,
+    windows: tuple[tuple[time, time], ...] = DEFAULT_WINDOWS,
+) -> bool:
+    """Whether the final slot is a change that fits the caller's goal."""
+    if slot_id is None or goal is None or slot_id == original:
+        return False
+    day = date(int(slot_id[:4]), int(slot_id[4:6]), int(slot_id[6:8]))
+    start = time(int(slot_id[9:11]), int(slot_id[11:13]))
+    end = next((e for s, e in windows if s == start), None)
+    if day != goal.date or end is None:
+        return False
+    return (goal.after is None or start >= goal.after) and (
+        goal.before is None or end <= goal.before
     )
 
 

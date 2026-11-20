@@ -11,10 +11,11 @@
       ids: ["Order 48291, pincode 380015."]
       wish: "Saturday shaam ko."
       reject: "Koi aur din ho sakta hai?"
+      fallback_wish: "Achha, Sunday shaam chalega."
     goals: [{date: 2026-11-28, after: "16:00"}]
     fallback_goal: {date: 2026-11-29, after: "16:00"}
     close: "Theek hai, thank you."
-  expected: {final_slot: "20261129-1600", writes: 1}
+  expected: {final_slot: "20261129-1600", writes: 1, final_fits: {date: 2026-11-29, after: "16:00"}}
 
 - id: unavailable-taken
   category: unavailable
