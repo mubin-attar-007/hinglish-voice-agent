@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import date, time, timedelta
 
 SCHEMA = """
-CREATE TABLE slots (
+CREATE TABLE IF NOT EXISTS slots (
     slot_id  TEXT PRIMARY KEY,
     day      TEXT NOT NULL,                       -- ISO date
     start    TEXT NOT NULL,                       -- HH:MM, local time (IST)
@@ -15,7 +15,7 @@ CREATE TABLE slots (
     capacity INTEGER NOT NULL CHECK (capacity >= 0)
 );
 
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS orders (
     order_id TEXT PRIMARY KEY,
     pincode  TEXT NOT NULL,
     item     TEXT NOT NULL,
@@ -24,14 +24,14 @@ CREATE TABLE orders (
     other_customer INTEGER NOT NULL DEFAULT 0     -- 1 = filler order of another synthetic customer
 );
 
-CREATE TABLE idempotency (
+CREATE TABLE IF NOT EXISTS idempotency (
     key      TEXT PRIMARY KEY,                    -- UNIQUE: one stored result per key
     order_id TEXT NOT NULL,
     slot_id  TEXT NOT NULL,
     result   TEXT NOT NULL                        -- JSON: status and commit sequence number
 );
 
-CREATE TABLE events (
+CREATE TABLE IF NOT EXISTS events (
     seq      INTEGER PRIMARY KEY AUTOINCREMENT,
     at_ms    INTEGER NOT NULL,                    -- virtual clock
     call_id  TEXT NOT NULL,
@@ -40,12 +40,12 @@ CREATE TABLE events (
     data     TEXT NOT NULL DEFAULT '{}'           -- JSON
 );
 
-CREATE TRIGGER events_no_update BEFORE UPDATE ON events
+CREATE TRIGGER IF NOT EXISTS events_no_update BEFORE UPDATE ON events
 BEGIN
     SELECT RAISE(ABORT, 'the event log is append-only');
 END;
 
-CREATE TRIGGER events_no_delete BEFORE DELETE ON events
+CREATE TRIGGER IF NOT EXISTS events_no_delete BEFORE DELETE ON events
 BEGIN
     SELECT RAISE(ABORT, 'the event log is append-only');
 END;

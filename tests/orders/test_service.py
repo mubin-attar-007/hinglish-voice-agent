@@ -231,3 +231,88 @@ def test_the_event_log_is_append_only() -> None:
         conn.execute("UPDATE events SET kind = 'y'")
     with pytest.raises(sqlite3.IntegrityError):
         conn.execute("DELETE FROM events")
+
+
+def test_reading_the_event_log_lets_due_late_writes_land() -> None:
+    svc = make(FaultRule(FaultKind.SLOW_RESPONSE, delay_ms=6000))
+    with pytest.raises(OrderServiceTimeout):
+        svc.reschedule(ORDER, SAT_4PM, client_timeout_ms=2500)
+    svc.clock.advance_to(10_000)
+    assert [c["to_slot"] for c in commits(svc)] == [SAT_4PM]
+    assert svc.writes_in_flight == 0
+
+
+def test_opening_the_same_database_file_twice_keeps_its_data(tmp_path: Any) -> None:
+    path = str(tmp_path / "orders.sqlite3")
+    seed(connect(path), WorldSpec(first_day=FRI, days=1))
+    assert connect(path).execute("SELECT COUNT(*) FROM slots").fetchone()[0] == 5
+
+
+# ---- time order: a late write must land at its own time ---------------------------------------
+
+
+def test_a_late_write_lands_before_a_newer_write_not_after_it() -> None:
+    svc = make(
+        FaultRule(FaultKind.SLOW_RESPONSE, nth=1, delay_ms=6000),
+        FaultRule(FaultKind.SLOW_RESPONSE, nth=2, delay_ms=4000),
+    )
+    with pytest.raises(OrderServiceTimeout):  # to 4 PM: still in flight at 2500 ms, lands at 6000
+        svc.reschedule(ORDER, SAT_4PM, client_timeout_ms=2500)
+    newer = svc.reschedule(ORDER, SAT_6PM, client_timeout_ms=5000)  # answers at 6500 ms
+    assert newer.status is WriteStatus.COMMITTED
+    assert slot_of(svc) == SAT_6PM  # the newer change wins
+    landed = [
+        (e.data["to_slot"], e.at_ms) for e in svc.events() if e.kind == "reschedule_committed"
+    ]
+    assert landed == [(SAT_4PM, 6000), (SAT_6PM, 6500)]
+
+
+def test_a_slow_re_read_sees_a_late_write_that_landed_meanwhile() -> None:
+    svc = make(
+        FaultRule(FaultKind.SLOW_RESPONSE, delay_ms=6000),
+        FaultRule(FaultKind.SLOW_RESPONSE, op="get_order", delay_ms=4000),
+    )
+    with pytest.raises(OrderServiceTimeout):
+        svc.reschedule(ORDER, SAT_4PM, client_timeout_ms=2500)
+    assert svc.get_order(ORDER, client_timeout_ms=5000).slot.slot_id == SAT_4PM
+
+
+def test_slow_read_delays_add_up() -> None:
+    svc = make(FaultRule(FaultKind.SLOW_RESPONSE, op="get_order", nth=None, delay_ms=2000))
+    svc2 = make(
+        FaultRule(FaultKind.SLOW_RESPONSE, op="get_order", nth=None, delay_ms=2000),
+        FaultRule(FaultKind.SLOW_RESPONSE, op="get_order", nth=None, delay_ms=2000),
+    )
+    assert svc.get_order(ORDER, client_timeout_ms=2500).slot.slot_id == FRI_2PM
+    with pytest.raises(OrderServiceTimeout):
+        svc2.get_order(ORDER, client_timeout_ms=2500)
+
+
+# ---- results must describe the record as it is -----------------------------------------------
+
+
+def test_a_replay_reports_where_the_order_is_now() -> None:
+    svc = make()
+    svc.reschedule(ORDER, SAT_4PM, idem_key="k1")
+    svc.reschedule(ORDER, SAT_6PM, idem_key="k2")
+    replay = svc.reschedule(ORDER, SAT_4PM, idem_key="k1")
+    assert replay.status is WriteStatus.REPLAYED
+    assert replay.order_in_requested_slot is False  # the order has moved on to 6 PM
+    assert replay.order is not None and replay.order.slot.slot_id == SAT_6PM
+
+
+def test_timeout_after_commit_does_not_fire_when_nothing_was_committed() -> None:
+    svc = make(FaultRule(FaultKind.TIMEOUT_AFTER_COMMIT), FaultRule(FaultKind.SLOT_TAKEN_MEANWHILE))
+    result = svc.reschedule(ORDER, SAT_4PM, idem_key="k1")
+    assert result.status is WriteStatus.SLOT_FULL
+    assert not [e for e in svc.events() if e.data.get("fault") == "timeout_after_commit"]
+
+
+def test_a_refused_write_does_not_also_take_the_slot() -> None:
+    svc = make(
+        FaultRule(FaultKind.SLOT_TAKEN_MEANWHILE),
+        FaultRule(FaultKind.SLOW_RESPONSE, delay_ms=6000),
+    )
+    with pytest.raises(OrderServiceTimeout):
+        svc.reschedule(ORDER, SAT_4PM, deadline_ms=2500, client_timeout_ms=2500)
+    assert "slot_taken_by_other" not in [e.kind for e in svc.events()]

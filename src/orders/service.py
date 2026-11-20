@@ -2,6 +2,9 @@
 
 One service instance serves one call. It has its own in-memory database, virtual clock and fault
 plan. All data is synthetic.
+
+Time only moves through `_advance` and `_advance_to`, which let due late writes land first. That
+keeps the record, the reads and the event log in time order.
 """
 
 from __future__ import annotations
@@ -37,7 +40,11 @@ _SLOT_COLUMNS = (
 
 @dataclass(frozen=True)
 class _PendingWrite:
-    """A write still in flight after its caller gave up. Only possible without a deadline."""
+    """A write still in flight after its caller gave up.
+
+    Possible only when no deadline forbids it: either no deadline was given, or the deadline is
+    later than the moment the write lands.
+    """
 
     due_ms: int
     order_id: str
@@ -46,6 +53,7 @@ class _PendingWrite:
     expected_version: int | None
     deadline_ms: int | None
     noop_if_unchanged: bool
+    slot_taken_first: bool  # the slot_taken_meanwhile fault applies when the write lands
 
 
 class OrderService:
@@ -168,9 +176,8 @@ class OrderService:
             raise OrderServiceError(
                 "injected fault: the request failed before anything was written"
             )
-        if FaultKind.SLOT_TAKEN_MEANWHILE in kinds and fill_slot(self._conn, slot_id):
-            self._log("slot_taken_by_other", None, {"slot_id": slot_id})
 
+        slot_taken = FaultKind.SLOT_TAKEN_MEANWHILE in kinds
         delay = sum(rule.delay_ms for rule in rules if rule.kind is FaultKind.SLOW_RESPONSE)
         if delay:
             self._log(
@@ -178,7 +185,7 @@ class OrderService:
             )
         if delay > client_timeout_ms:
             if deadline_ms is not None and start + delay > deadline_ms:
-                self.clock.advance_to(start + client_timeout_ms)
+                self._advance_to(start + client_timeout_ms)
                 self._log(
                     "write_refused_after_deadline",
                     order_id,
@@ -194,12 +201,15 @@ class OrderService:
                         expected_version=expected_version,
                         deadline_ms=deadline_ms,
                         noop_if_unchanged=noop_if_unchanged,
+                        slot_taken_first=slot_taken,
                     )
                 )
-                self.clock.advance_to(start + client_timeout_ms)
+                self._advance_to(start + client_timeout_ms)
             raise OrderServiceTimeout("the order service did not answer in time")
 
-        self.clock.advance(delay)
+        self._advance(delay)
+        if slot_taken:
+            self._take_slot(slot_id)
         result = self._write(
             order_id,
             slot_id,
@@ -208,9 +218,13 @@ class OrderService:
             deadline_ms=deadline_ms,
             noop_if_unchanged=noop_if_unchanged,
         )
-        if FaultKind.TIMEOUT_AFTER_COMMIT in kinds:
-            self.clock.advance_to(start + client_timeout_ms)
-            self._log("fault_injected", order_id, {"fault": FaultKind.TIMEOUT_AFTER_COMMIT})
+        if FaultKind.TIMEOUT_AFTER_COMMIT in kinds and result.status is WriteStatus.COMMITTED:
+            self._advance_to(start + client_timeout_ms)
+            self._log(
+                "fault_injected",
+                order_id,
+                {"fault": FaultKind.TIMEOUT_AFTER_COMMIT, "commit_seq": result.commit_seq},
+            )
             raise OrderServiceTimeout("the order service did not answer in time")
         return result
 
@@ -222,6 +236,8 @@ class OrderService:
             return
         self._pending = [p for p in self._pending if p.due_ms > now]
         for pending in due:
+            if pending.slot_taken_first:
+                self._take_slot(pending.slot_id, at_ms=pending.due_ms)
             self._write(
                 pending.order_id,
                 pending.slot_id,
@@ -235,11 +251,13 @@ class OrderService:
 
     @property
     def writes_in_flight(self) -> int:
+        self.tick()
         return len(self._pending)
 
     # ---- the event log -----------------------------------------------------------------------
 
     def events(self, since_seq: int = 0) -> list[Event]:
+        self.tick()
         rows = self._conn.execute(
             "SELECT seq, at_ms, call_id, order_id, kind, data FROM events "
             "WHERE seq > ? ORDER BY seq",
@@ -258,9 +276,22 @@ class OrderService:
         ]
 
     def last_seq(self) -> int:
+        self.tick()
         return int(self._conn.execute("SELECT COALESCE(MAX(seq), 0) FROM events").fetchone()[0])
 
     # ---- internals ---------------------------------------------------------------------------
+
+    def _advance(self, ms: int) -> None:
+        self.clock.advance(ms)
+        self.tick()
+
+    def _advance_to(self, ms: int) -> None:
+        self.clock.advance_to(ms)
+        self.tick()
+
+    def _take_slot(self, slot_id: str, *, at_ms: int | None = None) -> None:
+        if fill_slot(self._conn, slot_id):
+            self._log("slot_taken_by_other", None, {"slot_id": slot_id}, at_ms=at_ms)
 
     def _write(
         self,
@@ -425,16 +456,19 @@ class OrderService:
             if rule.kind is FaultKind.ERROR_BEFORE_COMMIT:
                 self._log("fault_injected", order_id, {"fault": rule.kind, "op": rule.op})
                 raise OrderServiceError(f"injected fault: {rule.op} failed")
-            if rule.kind is FaultKind.SLOW_RESPONSE:
-                self._log(
-                    "fault_injected",
-                    order_id,
-                    {"fault": rule.kind, "op": rule.op, "delay_ms": rule.delay_ms},
-                )
-                if rule.delay_ms > client_timeout_ms:
-                    self.clock.advance(client_timeout_ms)
-                    raise OrderServiceTimeout(f"{rule.op} did not answer in time")
-                self.clock.advance(rule.delay_ms)
+        delay = sum(rule.delay_ms for rule in rules if rule.kind is FaultKind.SLOW_RESPONSE)
+        if not delay:
+            return
+        op = rules[0].op
+        self._log(
+            "fault_injected",
+            order_id,
+            {"fault": FaultKind.SLOW_RESPONSE, "op": op, "delay_ms": delay},
+        )
+        if delay > client_timeout_ms:
+            self._advance(client_timeout_ms)
+            raise OrderServiceTimeout(f"{op} did not answer in time")
+        self._advance(delay)
 
     def _log(
         self, kind: str, order_id: str | None, data: dict[str, Any], *, at_ms: int | None = None

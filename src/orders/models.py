@@ -21,11 +21,6 @@ class WriteStatus(StrEnum):
     KEY_MISMATCH = "key_mismatch"  # an idempotency key reused for a different change
     DEADLINE_EXCEEDED = "deadline_exceeded"  # refused: the caller's deadline had passed
 
-    @property
-    def order_is_in_requested_slot(self) -> bool:
-        """True when, after this request, the order sits in the slot that was asked for."""
-        return self in (WriteStatus.COMMITTED, WriteStatus.REPLAYED, WriteStatus.NOOP)
-
 
 @dataclass(frozen=True)
 class Slot:
@@ -59,6 +54,15 @@ class WriteResult:
     order: OrderView | None  # the order as it stands after the request, if it exists
     commit_seq: int | None  # event sequence number of the commit this result refers to
     detail: str = ""
+
+    @property
+    def order_in_requested_slot(self) -> bool:
+        """Whether the order sits in the requested slot now, judged from the current record.
+
+        Not from the status alone: a REPLAYED result repeats an old answer, and the order may
+        have moved since.
+        """
+        return self.order is not None and self.order.slot.slot_id == self.slot_id
 
 
 @dataclass(frozen=True)
