@@ -1,0 +1,37 @@
+# Local agent brief: kept out of the public repo on purpose
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+
+# Tool caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Runtime data: synthetic order databases are rebuilt on demand
+*.sqlite3
+*.db
+
+# Scratch evaluation output; versioned results live in results/
+results/**/scratch/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
