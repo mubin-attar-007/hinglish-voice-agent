@@ -129,6 +129,7 @@ _NUMBER_WORDS = {
     "barah": 12,
     "twelve": 12,
 }
+NUMBER_WORDS = _NUMBER_WORDS  # public: hour words, for readers of agent text
 _FRACTION_MINUTES = {"saadhe": 30, "sadhe": 30, "saade": 30, "sava": 15, "savaa": 15}
 _QUARTER_TO = {"paune", "pone"}
 _SPECIAL_TIMES = {"dedh": (1, 30), "dhaai": (2, 30), "dhai": (2, 30)}

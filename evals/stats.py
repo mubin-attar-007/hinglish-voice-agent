@@ -42,4 +42,5 @@ def bootstrap_mean(
         sum(sum(g) / len(g) for g in (rng.choice(groups) for _ in groups)) / len(groups)
         for _ in range(reps)
     )
-    return (means[int(0.025 * reps)], means[int(0.975 * reps) - 1])
+    last = reps - 1  # symmetric percentile indices: as many values below as above
+    return (means[math.floor(0.025 * last)], means[math.ceil(0.975 * last)])

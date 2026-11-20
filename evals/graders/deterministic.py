@@ -165,4 +165,10 @@ def _gate_counts(record: TrialRecord) -> dict[str, int]:
         elif verdict["would"]:
             counts[f"would_{verdict['would']}"] += 1
     counts["outcome_by_code"] = sum(1 for s in record.spoken if s.rule == "outcome_by_code")
+    counts["silenced_claims"] = sum(  # claims in a response that made a change: never spoken
+        1
+        for d in record.log.dropped
+        if d["why"] == "same_response_as_write"
+        and d.get("claim") in ("confirm", "fail", "state_slot")
+    )
     return dict(counts)

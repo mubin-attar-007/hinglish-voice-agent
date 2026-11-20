@@ -84,7 +84,7 @@ These describe the mock, and say nothing about how good a real model is.
 
 Same sample as above. When none occur, the report gives the rule-of-three upper bound (0 in n trials means at most 3/n at 95% confidence) and the exact bound 1 − 0.05^(1/n).
 
-- `mock-reckless`, all layers on: **0** duplicate writes in 60 trials. That bounds the rate below 5% (rule of three), or 4.9% (exact), for this mock.
+- `mock-reckless`, all layers on: **0** duplicate writes in 60 trials. At 95% confidence that puts the rate at 5% or less (rule of three), or 4.9% or less (exact), for this mock.
 - `mock-reckless`, all layers off: 13 duplicate writes, in 13 of 60 trials.
 - `mock-competent`, all layers off: 3 duplicate writes in 60 trials, all in `fault-slow-late`. The write is so slow that the caller is told "not saved", which is true at that moment. The write then lands late, and the competent agent's good-faith retry writes again. This is the race the commit deadline exists to close.
 

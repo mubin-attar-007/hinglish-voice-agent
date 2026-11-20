@@ -46,7 +46,7 @@ Not live yet. A public demo and a captioned recording are planned for milestones
 | `mock-reckless` | off | 3 / 60 | 13 | 92 | 58 |
 | `mock-competent` | off | 57 / 60 | 3 | 0 | 0 |
 
-- **What 0 means here:** with the layers on, 0 in 60 calls bounds each rate below 5% (rule of three) for this mock.
+- **What 0 means here:** with the layers on, 0 in 60 calls puts each rate at 5% or less, at 95% confidence (rule of three), for this mock.
 - **The well-behaved mock still double-books without the layers.** A write that lands late turns its good-faith retry into a second booking. ([Why](docs/METHOD.md#duplicate-bookings).)
 - **The claim detector** catches 72% of outcome claims in held-out paraphrases. The design doesn't rely on it at the moment of a change. ([Details and misses](docs/METHOD.md#the-claim-detector).)
 - **The raw results** are in [results/text/v0/](results/text/v0/).

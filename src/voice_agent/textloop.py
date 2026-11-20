@@ -92,12 +92,18 @@ class TextAgent:
                     self.log.dropped.append({"turn": self.turn, "text": text, "why": "after_block"})
                     continue
                 verdict = self.gate.check(text)
-                self._log_verdict(text, meaning, verdict)
-                if silent:
+                if silent:  # not a gate decision: counted apart, as silenced
                     self.log.dropped.append(
-                        {"turn": self.turn, "text": text, "why": "same_response_as_write"}
+                        {
+                            "turn": self.turn,
+                            "text": text,
+                            "why": "same_response_as_write",
+                            "claim": verdict.claim.kind.value,
+                            "label": meaning.kind.value if meaning else None,
+                        }
                     )
                     continue
+                self._log_verdict(text, meaning, verdict)
                 if verdict.action is Action.ALLOW:
                     spoken_now.append(self._say(text, "model", meaning, verdict))
                 elif verdict.action is Action.REWRITE:
@@ -144,7 +150,9 @@ class TextAgent:
                     self._remember(self.log.spoken[-1:])
                 if blocks >= 2:
                     break
-                note = GATE_NOTES.get(blocked.rule, "")
+                # A note only if nothing changed since the block: tools that ran in this step
+                # may already have made it stale ("no order looked up yet" after a lookup).
+                note = "" if step.calls else GATE_NOTES.get(blocked.rule, "")
                 continue
             if not step.calls:
                 break

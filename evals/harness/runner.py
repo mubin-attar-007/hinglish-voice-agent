@@ -87,9 +87,10 @@ def run_trial(
             if call["turn"] == agent.turn and call["name"] == "list_slots"
             for slot in call["result"].get("slots", [])
         ]
-        action = caller.hear(spoken, listed, service.last_seq())
-        if action.interrupt_at_word is not None:
-            agent.barge_in(action.interrupt_at_word)
+        point = caller.barge_in_point(spoken, listed)  # decided while the agent speaks
+        if point is not None:
+            agent.barge_in(point)
+        action = caller.hear(spoken, service.last_seq())  # reacts only to what was heard
         line = None if action.ended else action.say
 
     clock.advance(CALLER_TURN_MS * 3)  # let any write still in flight land before grading
