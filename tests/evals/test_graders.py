@@ -80,3 +80,22 @@ def test_a_cancelled_change_writes_nothing_and_passes() -> None:
     result = grade(record)
     assert result.writes == 0
     assert result.passed, result.checks
+
+
+def test_a_slot_that_fits_but_was_never_chosen_fails_the_final_state() -> None:
+    """The agent must book the slot the caller chose, not just any slot in the window."""
+    from types import SimpleNamespace
+
+    from evals.graders.deterministic import _final_ok
+
+    found = scenario("plain-hi-roman")
+    chose_4pm = [{"what": "picked:20261128-1600", "seq": 9, "turn": 3, "said": "4 se 6 wala"}]
+
+    def record(final: str, log: list[dict[str, object]]) -> object:
+        return SimpleNamespace(
+            scenario=found, final_slot=final, original_slot=FRI_2PM, caller_log=log
+        )
+
+    assert _final_ok(record(SAT_4PM, chose_4pm)) is True  # type: ignore[arg-type]
+    assert _final_ok(record("20261128-1800", chose_4pm)) is False  # type: ignore[arg-type]
+    assert _final_ok(record(SAT_4PM, [])) is False  # booked without any choice  # type: ignore[arg-type]

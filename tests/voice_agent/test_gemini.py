@@ -121,3 +121,52 @@ def test_without_a_key_it_refuses_to_start(monkeypatch: pytest.MonkeyPatch) -> N
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     with pytest.raises(RuntimeError, match="GEMINI_API_KEY"):
         GeminiLLM()
+
+
+def test_thinking_levels_are_sent_only_to_models_that_take_them() -> None:
+    for model, expect_level in (("gemini-3.5-flash-lite", True), ("gemini-2.5-flash", False)):
+        fake = FakeModels([response(types.Part.from_text(text="ok"))])
+        llm = GeminiLLM(model=model, client=SimpleNamespace(models=fake))
+        list(llm.stream("s", [Message("user", "hi")], TOOL_SPECS))
+        config = fake.calls[0]["config"]
+        assert (config.thinking_config is not None) is expect_level
+    fake = FakeModels([response(types.Part.from_text(text="ok"))])
+    llm = GeminiLLM(client=SimpleNamespace(models=fake), thinking=None)
+    list(llm.stream("s", [Message("user", "hi")], TOOL_SPECS))
+    assert fake.calls[0]["config"].thinking_config is None
+
+
+def test_a_rate_limit_is_retried_after_a_paced_wait() -> None:
+    class RateLimited(Exception):
+        code = 429
+
+    class Flaky(FakeModels):
+        def generate_content(self, *, model: str, contents: list[Any], config: Any) -> Any:
+            if not self.calls:
+                self.calls.append({"model": model, "contents": contents, "config": config})
+                raise RateLimited("429 RESOURCE_EXHAUSTED")
+            return super().generate_content(model=model, contents=contents, config=config)
+
+    fake = Flaky([response(types.Part.from_text(text="ok"))])
+    llm = GeminiLLM(client=SimpleNamespace(models=fake), min_interval_s=0.0)
+    waits: list[float] = []
+    llm._sleep = waits.append  # type: ignore[method-assign]
+    events = list(llm.stream("s", [Message("user", "hi")], TOOL_SPECS))
+    assert isinstance(events[0], TextDelta) and events[0].text == "ok"
+    assert waits == [5.0]  # waited before retrying, instead of bursting
+
+
+def test_a_non_retryable_error_is_not_retried() -> None:
+    class BadRequest(Exception):
+        code = 400
+
+    class Broken(FakeModels):
+        def generate_content(self, *, model: str, contents: list[Any], config: Any) -> Any:
+            self.calls.append({})
+            raise BadRequest("400 INVALID_ARGUMENT")
+
+    fake = Broken([])
+    llm = GeminiLLM(client=SimpleNamespace(models=fake))
+    with pytest.raises(BadRequest):
+        list(llm.stream("s", [Message("user", "hi")], TOOL_SPECS))
+    assert len(fake.calls) == 1

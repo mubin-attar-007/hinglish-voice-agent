@@ -108,3 +108,54 @@ def test_a_stated_slot_with_no_question_still_ends_a_cancelled_change() -> None:
         ),
     )
     assert action.say == found.caller.close
+
+
+# ---- review of PR #6 ------------------------------------------------------------------------
+
+
+def test_a_stated_slot_then_theek_hai_still_ends_a_cancelled_change() -> None:
+    caller, found = caller_for("mind-cancel")
+    action = turn(
+        caller,
+        (
+            "आपकी delivery अभी Friday, 27 November, दोपहर 2 से 4 बजे के बीच है।",
+            "template",
+            Meaning(ClaimKind.STATE_SLOT, FRIDAY_2PM),
+        ),
+        ("Theek hai?", "model", None),
+    )
+    assert action.say == found.caller.close
+
+
+def test_another_day_after_a_rejection_gets_the_fallback_wish_not_a_goodbye() -> None:
+    caller, found = caller_for("unavailable-full")
+    afternoon = {
+        "slot_id": "20261128-1200",
+        "date": "2026-11-28",
+        "window": "12:00-14:00",
+        "available": True,
+    }
+    turn(
+        caller,
+        ("Kya aap 12:00 se 14:00 wala slot lena chahenge?", "model", None),
+        listed=[afternoon],
+    )
+    action = turn(
+        caller, ("Saturday shaam full hai. Kya aap kuch aur din dekhna chahenge?", "model", None)
+    )
+    assert action.say == found.caller.facts.fallback_wish
+
+
+def test_the_fallback_day_needs_a_rejection_first() -> None:
+    caller, found = caller_for("unavailable-full")
+    action = turn(caller, ("Saturday ya Sunday, kaunsa din?", "model", None))
+    assert action.say != found.caller.facts.fallback_wish
+
+
+def test_kab_in_a_statement_is_not_a_question() -> None:
+    caller, _ = caller_for("mind-cancel")
+    turn(caller, ("Delivery kab aayegi, uska SMS aapko mil jayega.", "model", None))
+    assert caller.log[-1]["what"] != "asked:when"
+    asked, _ = caller_for("mind-cancel")
+    turn(asked, ("Aapko delivery kab chahiye?", "model", None))
+    assert asked.log[-1]["what"] == "asked:when"

@@ -44,6 +44,13 @@ def _positive(value: str) -> float:
     return number
 
 
+def _non_negative(value: str) -> float:
+    number = float(value)
+    if number < 0:
+        raise argparse.ArgumentTypeError("must not be negative")
+    return number
+
+
 def _rate_limited(error: Exception) -> bool:
     return "429" in str(error) or "RESOURCE_EXHAUSTED" in str(error)
 
@@ -57,8 +64,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--model", help=f"the Gemini model id (default {DEFAULT_MODEL})")
     parser.add_argument(
         "--thinking",
-        choices=["minimal", "low", "medium", "high"],
-        help="Gemini thinking level (default low: a phone call can't wait for long thinking)",
+        choices=["none", "minimal", "low", "medium", "high"],
+        help="Gemini thinking level (default low: a phone call can't wait for long thinking); "
+        "none sends no thinking setting",
     )
     parser.add_argument(
         "--max-usd",
@@ -69,8 +77,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--min-interval-s",
-        type=float,
-        default=0.0,
+        type=_non_negative,
+        default=None,
         help="real models only: at least this many seconds between request starts, to stay "
         "under a requests-per-minute limit (default 0)",
     )
@@ -92,8 +100,11 @@ def main(argv: list[str] | None = None) -> int:
         "(shows a baseline run is not vacuous)",
     )
     args = parser.parse_args(argv)
-    if (args.model or args.thinking) and args.llm != "gemini":
-        parser.error("--model and --thinking apply to --llm gemini only")
+    real_only = (args.model, args.thinking, args.min_interval_s)
+    if any(value is not None for value in real_only) and args.llm != "gemini":
+        parser.error("--model, --thinking and --min-interval-s apply to --llm gemini only")
+    thinking = None if args.thinking == "none" else (args.thinking or DEFAULT_THINKING)
+    min_interval_s = args.min_interval_s or 0.0
 
     corpus = load_corpus(args.corpus)
     safety = SafetyConfig() if args.safety == "full" else SafetyConfig.baseline()
@@ -109,9 +120,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"No dated price for {model} in voice_agent/llm/pricing.py.", file=sys.stderr)
             return 2
         meter = CostMeter(price, cap_usd=args.max_usd)
-        factory = gemini_factory(
-            model, meter, args.thinking or DEFAULT_THINKING, max(0.0, args.min_interval_s)
-        )
+        factory = gemini_factory(model, meter, thinking, min_interval_s)
     else:
         factory = mock_factory(args.llm)
 
@@ -166,8 +175,8 @@ def main(argv: list[str] | None = None) -> int:
         stopped=stopped,
     )
     if args.llm == "gemini":
-        report["model"]["thinking"] = args.thinking or DEFAULT_THINKING
-        report["model"]["min_interval_s"] = args.min_interval_s
+        report["model"]["thinking"] = thinking  # what was actually sent
+        report["model"]["min_interval_s"] = min_interval_s
     metrics = report["metrics"]
     if not report["complete"]:
         print(f"  INCOMPLETE: {stopped or ''} {len(errors)} errored trial(s)")

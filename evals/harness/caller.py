@@ -29,7 +29,7 @@ _ASKS_IDS = re.compile(r"order (?:number|id|nambar)|pin ?code|पिन|order �
 _NOT_FOUND = re.compile(r"नहीं मिला|nahi mila|couldn't find|could not find", re.IGNORECASE)
 _ASKS_WHEN = re.compile(
     r"\bwhen\b[^.?!]*\?|\b(?:which|what) (?:day|date|time)\b|\bkis (?:din|date|time|samay)\b|"
-    r"\bkab\b|किस (?:दिन|date|time|समय)|कब",
+    r"\bkab\b[^.?!।]*\?|किस (?:दिन|date|time|समय)|कब[^.?!।]*\?",
     re.IGNORECASE,
 )
 _CLARIFY = re.compile(r"\b(?:ya|or)\b|\sया\s|which day next week|अगले हफ्ते किस दिन", re.IGNORECASE)
@@ -38,7 +38,8 @@ _NO_CHANGE = re.compile(r"कोई change नहीं|koi change nahi|haven't 
 _GOODBYE = re.compile(r"धन्यवाद|शुभ हो|have a good day|thank you", re.IGNORECASE)
 # The agent wrapping up: the caller says goodbye rather than asking for more.
 _ANYTHING_ELSE = re.compile(
-    r"\banything else\b|\bkuch aur\b|\baur kuch\b|\bkoi aur (?:madad|sawal)\b|कुछ और|और कुछ",
+    r"\banything else\b|\b(?:kuch aur|aur kuch|koi aur|aur koi) (?:madad|help|sawal)\b|"
+    r"\b(?:aur kuch|kuch aur)\s*\?|कुछ और मदद|और कुछ मदद",
     re.IGNORECASE,
 )
 
@@ -93,6 +94,7 @@ class ScriptedCaller:
         self._armed: tuple[int, Trigger] | None = None
         self._offers = 0
         self._offered: list[dict[str, Any]] = []
+        self._last_offered: list[dict[str, Any]] = []  # the most recent slots offered
         self._confirmed = 0
         self._told: set[tuple[ClaimKind, str | None]] = set()  # outcomes already heard
         self._repeated = False  # this turn repeated an outcome heard before
@@ -116,6 +118,7 @@ class ScriptedCaller:
         ]
         if not self._offered:
             return None
+        self._last_offered = self._offered
         self._offers += 1
         for i, trigger in enumerate(self.script.triggers):
             if i not in self._fired and self._offers == trigger.nth:
@@ -163,7 +166,7 @@ class ScriptedCaller:
         # ("Kya aap Sunday ya kisi aur din ka dekhna chahenge?").
         fallback = self.script.fallback_goal
         fallback_wish = self.script.facts.fallback_wish
-        if fallback and fallback_wish and "?" in text and not self._offered:
+        if fallback and fallback_wish and self._rejected and "?" in text and not self._offered:
             spec = parse_when(text, self.now)
             if spec.day == fallback.date or fallback.date in spec.alternatives:
                 return self._reply(fallback_wish, "accepted_other_day", seq)
@@ -192,9 +195,7 @@ class ScriptedCaller:
         )
         if (
             outcome is ClaimKind.FAIL
-            or (
-                states_slot and "?" not in text
-            )  # a stated slot ends a call only if nothing was asked
+            or states_slot  # questions about when, offers and clarifications came first
             or _NO_CHANGE.search(text)
             or _GOODBYE.search(text)
             or _ANYTHING_ELSE.search(text)
@@ -206,7 +207,10 @@ class ScriptedCaller:
             self.stuck = True
             self._note("harness_stuck", seq)
             return CallerAction(None, ended=True)
-        return self._reply(self.script.facts.repeat or self.script.facts.wish, "unmatched", seq)
+        facts = self.script.facts
+        if self._rejected and facts.fallback_wish:  # "kuch aur din dekhna chahenge?" and the like
+            return self._reply(facts.fallback_wish, "unmatched", seq)
+        return self._reply(facts.repeat or facts.wish, "unmatched", seq)
 
     # ---- helpers -----------------------------------------------------------------------------
 
@@ -242,7 +246,20 @@ class ScriptedCaller:
     def _reply(self, line: str, why: str, seq: int) -> CallerAction:
         self._unmatched = 0
         self._note(why, seq, line)
+        if why in ("after_not_saved", "after_outcome"):  # e.g. "toh 6 baje wala kar dijiye"
+            named = self._slot_named(line)
+            if named is not None:
+                self._note(f"picked:{named['slot_id']}", seq)
         return CallerAction(line)
+
+    def _slot_named(self, line: str) -> dict[str, Any] | None:
+        """A slot from the last offer that a scripted line names by its time, if any."""
+        spec = parse_when(line, self.now)
+        for slot in self._last_offered:
+            start, end = (time.fromisoformat(part) for part in slot["window"].split("-"))
+            if spec.at == start or (spec.after == start and spec.before in (None, end)):
+                return slot
+        return None
 
     def _close(self, seq: int) -> CallerAction:
         self._closed = True

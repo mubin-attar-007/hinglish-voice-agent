@@ -26,7 +26,9 @@ from voice_agent.tools import ToolCall, ToolSpec
 DEFAULT_MODEL = "gemini-3.8-flash"
 REQUEST_TIMEOUT_MS = 60_000  # sent to the server as its deadline (X-Server-Timeout)
 DEFAULT_THINKING = "low"  # a phone call cannot wait for long thinking
-RETRY_ATTEMPTS = 3  # the SDK retries rate limits and server errors
+RETRY_ATTEMPTS = 3  # our own paced retries for rate limits and overload (not the SDK's)
+RETRY_WAITS_S = (5.0, 15.0, 30.0)
+_RETRY_CODES = {429, 500, 503, 504}
 
 
 class GeminiLLM:
@@ -46,6 +48,7 @@ class GeminiLLM:
         self.thinking = thinking  # minimal | low | medium | high | None (the model's default)
         self._seed = seed
         self._min_interval_s = min_interval_s  # stay under a requests-per-minute limit
+        self._sleep = time.sleep  # replaced in tests
         self._meter = meter
         if client is None:
             from google import genai
@@ -58,7 +61,7 @@ class GeminiLLM:
                 api_key=key,
                 http_options=types.HttpOptions(
                     timeout=REQUEST_TIMEOUT_MS,
-                    retry_options=types.HttpRetryOptions(attempts=RETRY_ATTEMPTS),
+                    retry_options=types.HttpRetryOptions(attempts=1),  # retries are ours, paced
                 ),
             )
         self._client = client
@@ -90,20 +93,26 @@ class GeminiLLM:
             thinking_config=types.ThinkingConfig(
                 thinking_level=types.ThinkingLevel(self.thinking.upper())
             )
-            if self.thinking
+            if self.thinking and _has_thinking_levels(self.name)
             else None,
         )
         if self._meter is not None:
             self._meter.check()
-        if self._min_interval_s:
-            wait = GeminiLLM._last_start + self._min_interval_s - time.monotonic()
-            if wait > 0:
-                time.sleep(wait)
-            GeminiLLM._last_start = time.monotonic()
+        contents = self._contents(messages)
         started = time.perf_counter()
-        response = self._client.models.generate_content(
-            model=self.name, contents=self._contents(messages), config=config
-        )
+        response: Any = None
+        for attempt in range(RETRY_ATTEMPTS):
+            self._pace()
+            started = time.perf_counter()
+            try:
+                response = self._client.models.generate_content(
+                    model=self.name, contents=contents, config=config
+                )
+                break
+            except Exception as exc:  # retry only rate limits and overload, and pace the retries
+                if getattr(exc, "code", None) not in _RETRY_CODES or attempt + 1 == RETRY_ATTEMPTS:
+                    raise
+                self._sleep(max(RETRY_WAITS_S[attempt], self._min_interval_s))
         latency_ms = (time.perf_counter() - started) * 1000
         usage = _usage(response)
         if self._meter is not None:
@@ -128,6 +137,15 @@ class GeminiLLM:
             self._call_parts[call_id] = part
             yield ToolCall(call_id, call.name, dict(call.args or {}))
         yield Done(model=self.name, usage=usage, latency_ms=latency_ms)
+
+    def _pace(self) -> None:
+        """Wait so that request starts are at least `min_interval_s` apart, retries included."""
+        if not self._min_interval_s:
+            return
+        wait = GeminiLLM._last_start + self._min_interval_s - time.monotonic()
+        if wait > 0:
+            self._sleep(wait)
+        GeminiLLM._last_start = time.monotonic()
 
     def _contents(self, messages: Sequence[Message]) -> list[Any]:
         from google.genai import types
@@ -171,6 +189,11 @@ class GeminiLLM:
                 contents.append(types.Content(role="model", parts=parts))
         flush_responses()
         return contents
+
+
+def _has_thinking_levels(model: str) -> bool:
+    """Gemini 3 and later take thinking levels; 1.x and 2.x models take a token budget instead."""
+    return not model.startswith(("gemini-1", "gemini-2"))
 
 
 def _usage(response: Any) -> Usage:
