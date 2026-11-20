@@ -2,7 +2,8 @@ name: Live eval (manual; can cost money)
 
 # Runs corpus v0 against a real Gemini model. Never runs on pull requests or pushes.
 # Needs the GEMINI_API_KEY repository secret (a dedicated key for this project).
-# The run stops before its list-price cost passes max_usd; on the free tier it costs nothing.
+# No request is sent once the list-price cost reaches max_usd (the last request can carry it
+# past by its own cost). On the free tier it costs nothing.
 
 on:
   workflow_dispatch:
@@ -16,7 +17,7 @@ on:
         default: "1"
         required: true
       max_usd:
-        description: "Stop before list-price cost passes this many US$"
+        description: "Send no request once list-price cost reaches this many US$"
         default: "1.0"
         required: true
 

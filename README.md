@@ -95,7 +95,8 @@ uv run python -m evals.bank                     # the claim detector on the sent
 None of these needs an API key or the network.
 
 **Against a real model.** Set `GEMINI_API_KEY` as an environment variable first, using a key made for this project only. This can cost money unless your key is on the free tier.
-- The run stops before its cost at list prices passes `--max-usd`.
+- No request is sent once the cost at list prices reaches `--max-usd`. The last request can carry the total past the cap by its own cost, which is a few thousand tokens.
+- A run cut short, or one with provider errors, is marked incomplete in its results file.
 - Only synthetic data is sent.
 
 ```sh

@@ -16,6 +16,7 @@ from voice_agent.calllog import CallLog, Spoken
 from voice_agent.gate.gate import ConfirmationGate
 from voice_agent.llm.base import LLMProvider
 from voice_agent.llm.mock import MockAgentLLM
+from voice_agent.llm.pricing import CostMeter
 from voice_agent.prompts import system_prompt
 from voice_agent.textloop import TextAgent
 from voice_agent.tools import SafetyConfig, ToolAdapter
@@ -34,11 +35,12 @@ def mock_factory(profile: str) -> LLMFactory:
     return make
 
 
-def gemini_factory(model: str) -> LLMFactory:
+def gemini_factory(model: str, meter: CostMeter | None = None) -> LLMFactory:
+    """Real Gemini calls. One shared meter counts every request and enforces the cost cap."""
     from voice_agent.llm.gemini import GeminiLLM
 
     def make(scenario: Scenario, seed_: int) -> LLMProvider:
-        return GeminiLLM(model=model, seed=seed_)
+        return GeminiLLM(model=model, seed=seed_, meter=meter)
 
     return make
 

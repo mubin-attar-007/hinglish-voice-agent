@@ -27,8 +27,9 @@ class TextDelta:
 
 @dataclass(frozen=True)
 class Usage:
-    input_tokens: int = 0
-    output_tokens: int = 0
+    input_tokens: int = 0  # prompt and tool-use prompt tokens
+    output_tokens: int = 0  # visible and thinking tokens: both are billed as output
+    thinking_tokens: int = 0  # the thinking share of output_tokens
 
 
 @dataclass(frozen=True)
