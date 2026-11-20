@@ -13,6 +13,7 @@ from evals.harness.runner import TrialRecord
 from evals.schema import Corpus
 from evals.stats import bootstrap_mean, pass_hat_k, wilson, zero_event_bounds
 from orders.clock import IST
+from voice_agent.llm.pricing import CostMeter, Price, cost_usd
 
 SCHEMA = "hinglish-voice-agent/results/v1"
 MOCK_NOTE = (
@@ -55,8 +56,14 @@ def summarise(
     corpus: Corpus,
     k: int,
     seeds: Sequence[int],
-    prices: dict[str, float] | None = None,
+    price: Price | None = None,
+    meter: CostMeter | None = None,
+    planned_trials: int | None = None,
+    errors: Sequence[dict[str, Any]] = (),
+    stopped: str | None = None,
 ) -> dict[str, Any]:
+    """The results JSON. A run is `complete` only if every planned trial ran without error;
+    an incomplete run says so, and pass^k covers only scenarios with all k runs."""
     first = records[0]
     by_scenario: dict[str, list[Grade]] = defaultdict(list)
     for grade in grades:
@@ -68,20 +75,25 @@ def summarise(
         return sum(1 for v in values if v), sum(values)
 
     passes = [[1.0 if g.passed else 0.0 for g in group] for group in by_scenario.values()]
-    hat_k = [
-        pass_hat_k(sum(g.passed for g in group), len(group), min(k, len(group)))
-        for group in by_scenario.values()
-    ]
+    full_groups = [group for group in by_scenario.values() if len(group) >= k]
+    hat_k = [pass_hat_k(sum(g.passed for g in group), len(group), k) for group in full_groups]
+    planned = planned_trials if planned_trials is not None else n
+    complete = n == planned and not errors and stopped is None
     gate_totals: dict[str, int] = defaultdict(int)
     for grade in grades:
         for key, value in grade.gate.items():
             gate_totals[key] += value
-    tokens_in = sum(step["input_tokens"] for r in records for step in r.log.steps)
-    tokens_out = sum(step["output_tokens"] for r in records for step in r.log.steps)
-    prices = prices or {}
-    usd = tokens_in / 1e6 * prices.get("input_per_mtok_usd", 0.0) + tokens_out / 1e6 * prices.get(
-        "output_per_mtok_usd", 0.0
-    )
+    if meter is not None:  # every request, including those of trials that errored
+        tokens_in, tokens_out, thinking = (
+            meter.input_tokens,
+            meter.output_tokens,
+            meter.thinking_tokens,
+        )
+    else:
+        tokens_in = sum(step["input_tokens"] for r in records for step in r.log.steps)
+        tokens_out = sum(step["output_tokens"] for r in records for step in r.log.steps)
+        thinking = sum(step.get("thinking_tokens", 0) for r in records for step in r.log.steps)
+    usd = cost_usd(tokens_in, tokens_out, price)
 
     clarify_required = [
         g
@@ -114,6 +126,10 @@ def summarise(
         "k": k,
         "seeds": list(seeds),
         "trials": n,
+        "planned_trials": planned,
+        "complete": complete,
+        "stopped": stopped,
+        "errored_trials": list(errors),
         "metrics": {
             "pass_at_1": {
                 "value": sum(g.passed for g in grades) / n,
@@ -123,8 +139,9 @@ def summarise(
             },
             "pass_hat_k": {
                 "k": k,
-                "value": sum(hat_k) / len(hat_k),
-                "method": "mean over scenarios of C(passes, k) / C(runs, k)",
+                "value": sum(hat_k) / len(hat_k) if hat_k else None,
+                "scenarios": len(hat_k),
+                "method": "mean over scenarios with all k runs of C(passes, k) / C(runs, k)",
             },
             "duplicate_writes": _rate(
                 dup_with, n, dup_total, "commits that re-apply a change already committed"
@@ -166,8 +183,10 @@ def summarise(
         "cost": {
             "input_tokens": tokens_in,
             "output_tokens": tokens_out,
+            "thinking_tokens": thinking,
             "usd": round(usd, 4),
-            "prices": prices,
+            "price": dict(price) if price else None,
+            "method": "tokens at the dated list price (paid tier); a free-tier key is not charged",
         },
         "failures": [
             {

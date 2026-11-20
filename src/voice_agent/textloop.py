@@ -214,6 +214,7 @@ class TextAgent:
                 "model": done.model if done else self.llm.name,
                 "input_tokens": done.usage.input_tokens if done else 0,
                 "output_tokens": done.usage.output_tokens if done else 0,
+                "thinking_tokens": done.usage.thinking_tokens if done else 0,
                 "latency_ms": done.latency_ms if done else 0.0,
             }
         )

@@ -92,7 +92,21 @@ uv run python -m evals.harness.run --show interrupt-demo                  # one 
 uv run python -m evals.bank                     # the claim detector on the sentence bank
 ```
 
-None of these needs an API key or the network. The voice pipeline arrives in milestone M2.
+None of these needs an API key or the network.
+
+**Against a real model.** Set `GEMINI_API_KEY` as an environment variable first, using a key made for this project only. This can cost money unless your key is on the free tier.
+- No request is sent once the cost at list prices reaches `--max-usd`. The last request can carry the total past the cap by its own cost, which is a few thousand tokens.
+- A run cut short, or one with provider errors, is marked incomplete in its results file.
+- Only synthetic data is sent.
+
+```sh
+uv run python -m evals.harness.run --llm gemini --model gemini-3.8-flash --k 1 --max-usd 1.0 \
+  --out results/text/v0/<date>_gemini-3.8-flash_full_faults-on_k1.json
+```
+
+The same run is also available as a manual GitHub workflow, "Live eval". It never runs on pull requests.
+
+The voice pipeline arrives in milestone M2.
 
 ## Limitations and failures
 
